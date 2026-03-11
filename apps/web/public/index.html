@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta name="description" content="Descargador de videos y audio - Proyecto educativo">
+  <meta name="theme-color" content="#111111">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Downloader App</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="shortcut icon" href="/favicon.png">
+
+  <link rel="stylesheet" href="/assets/styles/main.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <main id="content" class="content">
+
+      <!-- ===== Buscador ===== -->
+      <div id="searchContainer">
+        <input id="searchInput" placeholder="Buscar video...">
+        <button id="searchBtn">
+          <i class="fas fa-search"></i> Buscar
+        </button>
+        <button id="voiceBtn">
+          <i class="fas fa-microphone"></i> VOZ
+        </button>
+      </div>
+
+      <p id="searchStatus" style="display:none; margin-top:10px;">
+        <i class="fas fa-spinner fa-spin"></i> Buscando...
+      </p>
+
+      <!-- ===== Secciones ===== -->
+      <div class="sections-bar">
+
+        <a href="#" id="homeSection" class="section-btn">
+          <i class="fas fa-house"></i>
+          <span>Inicio</span>
+        </a>
+
+        <a href="#" id="musicSection" class="section-btn">
+          <i class="fas fa-music"></i>
+          <span>Música</span>
+        </a>
+
+        <a href="#" id="historySection" class="section-btn">
+          <i class="fas fa-clock-rotate-left"></i>
+          <span>Historial</span>
+        </a>
+
+        <a href="#" id="favoritesSection" class="section-btn">
+          <i class="fas fa-heart"></i>
+          <span>Favoritos</span>
+        </a>
+
+        <a href="#" id="downloadsSection" class="section-btn">
+          <i class="fas fa-circle-down"></i>
+          <span>Descargas</span>
+        </a>
+
+        <a href="#" id="profileSection" class="section-btn">
+          <i class="fas fa-user"></i>
+          <span>Perfil</span>
+        </a>
+
+      </div>
+
+      <!-- ===== Historial de búsquedas ===== -->
+      <section class="section search-history-section">
+        <div id="searchHistoryList" class="search-history-list"></div>
+      </section>
+
+      <!-- ===== Reproductor ===== -->
+      <div class="video-card">
+
+        <div class="video-wrapper">
+          <video id="player" controls autoplay preload="auto"></video>
+          <video id="preloadPlayer" style="display:none;"></video>
+        </div>
+
+        <div class="video-info">
+          <h4 id="videoMainTitle"></h4>
+          <h5 id="videoSubTitle"></h5>
+
+          <div class="controller">
+            <button type="button" class="control-btn seek-back">
+              <i class="fas fa-rotate-left"></i>
+            </button>
+
+            <button type="button" id="prevBtn" class="control-btn prev-btn">
+              <i class="fas fa-step-backward"></i>
+            </button>
+
+            <button id="playPauseBtn" class="control-btn play-btn">
+              <i class="fas fa-play"></i>
+            </button>
+
+            <button type="button" id="nextBtn" class="control-btn next-btn">
+              <i class="fas fa-step-forward"></i>
+            </button>
+
+            <button class="control-btn seek-forward">
+              <i class="fas fa-rotate-right"></i>
+            </button>
+          </div>
+
+          <div id="videoLoading" class="video-loading hidden"></div>
+
+          <div id="downloadContainer" class="download-container hidden">
+            <button id="downloadVideoBtn">
+              <i class="fas fa-download"></i>
+              <span>Descargar Video</span>
+            </button>
+
+            <button id="downloadAudioBtn">
+              <i class="fas fa-music"></i>
+              <span>Descargar Audio</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ===== Resultados ===== -->
+      <div id="results"></div>
+
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer">
+      <p>
+        Este es un proyecto en desarrollo orientado al aprendizaje, la experimentación y el uso educativo.
+        Si tiene alguna sugerencia, puede utilizar el buzón de recomendaciones para enviar sus ideas o mejoras que
+        ayuden al crecimiento del proyecto.
+        No se aceptarán sugerencias relacionadas con contenido inapropiado, ilegal o que promueva usos indebidos de la
+        plataforma.
+      </p>
+
+      <p>
+        El proyecto tiene únicamente fines educativos y no comerciales. No se obtiene ningún beneficio económico de su
+        funcionamiento y su propósito principal es servir como entorno de prueba, estudio y desarrollo tecnológico.
+      </p>
+
+      <p>
+        Todo uso que los usuarios hagan del sistema es bajo su propia responsabilidad. Cualquier uso indebido, ilegal o
+        contrario a las normas establecidas no está relacionado con los objetivos del proyecto.
+      </p>
+
+      <p>
+        Este proyecto es abierto y compartido con fines de aprendizaje. El código, las ideas y los recursos utilizados
+        están pensados para ser estudiados, analizados y mejorados por la comunidad dentro de un contexto educativo.
+      </p>
+
+      <p>
+        Contacto: <a href="mailto:contactogmcn@gmail.com">contacto@proyecto.com</a>
+      </p>
+
+      <p>
+        Proyecto educativo · Sin fines de lucro · No comercial · Proyecto abierto
+      </p>
+      <p>
+        Proyecto creado el 05 de marzo de 2026 y desarrollado bajo el nombre de GMCN.
+        Si desea, puede revisar los <a href="#"
+          onclick="document.getElementById('terminos-gmcn').style.display='block';return false;">términos y condiciones
+          de GMCN</a>.
+      </p>
+
+      <div id="terminos-gmcn" style="display:none; padding:15px; border:1px solid #444; margin-top:10px;">
+
+        <h3>Términos y Condiciones - GMCN</h3>
+
+        <p>
+          Este proyecto es un desarrollo abierto creado con fines educativos, de aprendizaje y experimentación
+          tecnológica.
+          El acceso, uso o interacción con este proyecto implica la aceptación de los siguientes términos y condiciones.
+        </p>
+
+        <p><strong>1. Naturaleza del proyecto</strong><br>
+          GMCN es un proyecto abierto y experimental desarrollado únicamente con fines educativos. No tiene fines
+          comerciales ni está destinado a operar como un servicio profesional o productivo.
+        </p>
+
+        <p><strong>2. Responsabilidad del uso</strong><br>
+          El uso de esta aplicación es responsabilidad exclusiva del usuario. GMCN no se responsabiliza por el uso que
+          cada persona haga del sistema, sus herramientas o cualquier funcionalidad disponible.
+        </p>
+
+        <p><strong>3. Seguridad y entorno de pruebas</strong><br>
+          Este proyecto puede estar desarrollado en un entorno no seguro o de pruebas. Por lo tanto, cualquier
+          información introducida, almacenada o procesada dentro de la aplicación podría potencialmente filtrarse o no
+          contar con garantías completas de seguridad.
+        </p>
+
+        <p><strong>4. Protección de datos</strong><br>
+          GMCN no se responsabiliza por ataques informáticos, filtraciones de datos, accesos no autorizados, pérdida de
+          información o cualquier incidente de seguridad que pueda ocurrir durante el uso de la plataforma.
+        </p>
+
+        <p><strong>5. Derechos de autor</strong><br>
+          GMCN únicamente desarrolla el código y la estructura técnica del proyecto. No se responsabiliza por el
+          contenido, descargas o materiales que los usuarios puedan obtener o utilizar mediante la aplicación,
+          especialmente si estos materiales están protegidos por derechos de autor.
+        </p>
+
+        <p><strong>6. Uso de contenido</strong><br>
+          Cualquier intento de descargar, distribuir o utilizar contenido protegido por derechos de autor es
+          responsabilidad exclusiva del usuario. GMCN no promueve ni se responsabiliza por la violación de derechos de
+          propiedad intelectual.
+        </p>
+
+        <p><strong>7. Uso indebido</strong><br>
+          No está permitido utilizar el proyecto para realizar actividades ilegales, distribución de contenido ilegal,
+          explotación de vulnerabilidades, ataques informáticos o cualquier actividad que infrinja leyes locales o
+          internacionales.
+        </p>
+
+        <p><strong>8. Limitación de responsabilidad</strong><br>
+          Bajo ninguna circunstancia GMCN será responsable de daños directos, indirectos, incidentales o derivados del
+          uso o mal uso de la aplicación.
+        </p>
+
+        <p><strong>9. Modificaciones del proyecto</strong><br>
+          Al tratarse de un proyecto en desarrollo, las funcionalidades, características o condiciones pueden cambiar,
+          modificarse o eliminarse en cualquier momento sin previo aviso.
+        </p>
+
+        <p><strong>10. Aceptación de los términos</strong><br>
+          El uso de esta aplicación implica que el usuario ha leído, comprendido y aceptado estos términos y
+          condiciones.
+        </p>
+
+      </div>
+
+    </footer>
+
+  </div>
+
+
+  <script>
+    document.getElementById("homeSection")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/index.html";
+    });
+
+    document.getElementById("musicSection")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/musica.html";
+    });
+
+    document.getElementById("historySection")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/historial.html";
+    });
+
+    document.getElementById("favoritesSection")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/favoritos.html";
+    });
+
+    document.getElementById("downloadsSection")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/descargas.html";
+    });
+
+    document.getElementById("profileSection")?.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.location.href = "/perfil.html";
+    });
+  </script>
+
+  <script type="module" src="/src/app/main.js" defer></script>
+</body>
+
+</html>

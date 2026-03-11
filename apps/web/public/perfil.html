@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    input {
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background: #334155;
+      color: white;
+    }
+
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #06b6d4;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0891b2;
+    }
+
+    .toggle {
+      text-align: center;
+      margin-top: 10px;
+      cursor: pointer;
+      color: #38bdf8;
+    }
+
+    .profile {
+      display: none;
+      text-align: center;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      cursor: pointer;
+      overflow: hidden;
+      border: 2px solid #bbb;
+      user-select: none;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .info {
+      background: #334155;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .logout {
+      background: #ef4444;
+      margin-top: 10px;
+    }
+
+    .home {
+      background: #22c55e;
+      margin-top: 10px;
+    }
+
+    .status {
+      margin-top: 10px;
+      text-align: center;
+      color: #cbd5e1;
+      min-height: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div id="auth">
+      <h2 id="title">Ingresar</h2>
+
+      <form id="form">
+        <input type="text" id="username" placeholder="Usuario" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button type="submit">Continuar</button>
+      </form>
+
+      <div class="toggle" id="toggle">
+        No tienes cuenta? Registrarse
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
+
+    <div id="profile" class="profile">
+      <label for="avatarInput" class="avatar" id="avatarPreview">
+        👤
+      </label>
+
+      <input type="file" id="avatarInput" accept="image/*" hidden>
+    </div>
+
+    <h2 id="userTitle">Perfil</h2>
+
+    <div class="info">
+      Usuario: <span id="userName"></span>
+    </div>
+
+    <div class="info">
+      Contraseña: <span id="userPass">******</span>
+    </div>
+
+    <button class="home" onclick="goHome()">
+      Ir a Inicio
+    </button>
+
+    <button class="logout" onclick="logout()">
+      Cerrar sesión
+    </button>
+  </div>
+
+  </div>
+
+  <script>
+    const form = document.getElementById("form");
+    const toggle = document.getElementById("toggle");
+    const title = document.getElementById("title");
+    const authBox = document.getElementById("auth");
+    const profile = document.getElementById("profile");
+    const statusBox = document.getElementById("status");
+
+    const avatarInput = document.getElementById("avatarInput");
+    const avatarPreview = document.getElementById("avatarPreview");
+
+    let mode = "login";
+
+
+
+
+    // Cargar avatar guardado
+    const savedAvatar = localStorage.getItem("userAvatar");
+    if (savedAvatar) {
+      avatarPreview.innerHTML = `<img src="${savedAvatar}" alt="Avatar">`;
+    }
+
+    avatarInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        const imageUrl = event.target.result;
+        avatarPreview.innerHTML = `<img src="${imageUrl}" alt="Avatar">`;
+        localStorage.setItem("userAvatar", imageUrl);
+      };
+
+      reader.readAsDataURL(file);
+    });
+    function showStatus(message, isError = false) {
+      statusBox.innerText = message || "";
+      statusBox.style.color = isError ? "#f87171" : "#cbd5e1";
+    }
+
+    // ✅ Ahora guarda donde espera session.js
+    function setSession(username) {
+      localStorage.setItem("gmcn_session", username);
+    }
+
+    function getSession() {
+      return localStorage.getItem("gmcn_session");
+    }
+
+    function logout() {
+      localStorage.removeItem("gmcn_session");
+      location.reload();
+    }
+
+    function goHome() {
+      window.location.href = "index.html";
+    }
+
+    function loadProfile(username) {
+      authBox.style.display = "none";
+      profile.style.display = "block";
+
+      document.getElementById("userName").innerText = username;
+    }
+
+    async function registerUser(username, password) {
+      const response = await fetch("/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+      return { ok: response.ok, data };
+    }
+
+    async function loginUser(username, password) {
+      const response = await fetch("/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await response.json();
+      return { ok: response.ok, data };
+    }
+
+    toggle.onclick = () => {
+      if (mode === "login") {
+        mode = "register";
+        title.innerText = "Registrarse";
+        toggle.innerText = "Ya tienes cuenta? Ingresar";
+        showStatus("");
+      } else {
+        mode = "login";
+        title.innerText = "Ingresar";
+        toggle.innerText = "No tienes cuenta? Registrarse";
+        showStatus("");
+      }
+    };
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !password) {
+        showStatus("Completa usuario y contraseña", true);
+        return;
+      }
+
+      showStatus("Procesando...");
+
+      try {
+        if (mode === "register") {
+          const result = await registerUser(username, password);
+
+          if (!result.ok || !result.data.ok) {
+            showStatus(result.data.error || "No se pudo registrar", true);
+            return;
+          }
+
+          setSession(result.data.user.username);
+          loadProfile(result.data.user.username);
+          showStatus("");
+          return;
+        }
+
+        if (mode === "login") {
+          const result = await loginUser(username, password);
+
+          if (!result.ok || !result.data.ok) {
+            showStatus(result.data.error || "No se pudo iniciar sesión", true);
+            return;
+          }
+
+          setSession(result.data.user.username);
+          loadProfile(result.data.user.username);
+          showStatus("");
+        }
+      } catch (error) {
+        console.error("Error en auth:", error);
+        showStatus("Error de conexión con el servidor", true);
+      }
+    };
+
+    function checkSession() {
+      const session = getSession();
+      if (!session) return;
+
+      loadProfile(session);
+    }
+
+    checkSession();
+  </script>
+
+</body>
+
+</html>

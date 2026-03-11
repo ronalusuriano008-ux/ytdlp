@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Favoritos</title>
+
+<style>
+:root{
+  --bg-main:#0f172a;
+  --bg-secondary:#111827;
+  --card-bg:#1e293b;
+  --card-hover:#273449;
+  --text-primary:#f1f5f9;
+  --accent-blue:#3b82f6;
+}
+
+body{
+  margin:0;
+  background:linear-gradient(135deg,var(--bg-main),var(--bg-secondary));
+  color:var(--text-primary);
+  font-family:Arial;
+}
+
+.section{padding:30px;}
+h2{color:var(--accent-blue);}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px;
+}
+
+.card{
+  background:var(--card-bg);
+  padding:20px;
+  border-radius:14px;
+  transition:.3s;
+}
+.card:hover{
+  background:var(--card-hover);
+  transform:translateY(-3px);
+}
+</style>
+</head>
+<body>
+
+<section class="section">
+<h2>Favoritos</h2>
+<div class="grid" id="grid"></div>
+</section>
+
+<script>
+const grid=document.getElementById("grid");
+for(let i=1;i<=4;i++){
+  const card=document.createElement("div");
+  card.className="card";
+  card.textContent="Favorito "+i;
+  grid.appendChild(card);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+﻿ytdlp
++-- apps
+|   +-- api
+|   |   +-- src
+|   |   |   +-- config
+|   |   |   +-- controllers
+|   |   |   +-- middlewares
+|   |   |   +-- routes
+|   |   |   |   +-- auth.routes.js
+|   |   |   |   +-- download.routes.js
+|   |   |   |   +-- metadata.routes.js
+|   |   |   |   +-- search.routes.js
+|   |   |   |   +-- stream.routes.js
+|   |   |   |   \-- user.routes.js
+|   |   |   +-- services
+|   |   |   |   +-- download.legacy.js
+|   |   |   |   +-- pythonClient.js
+|   |   |   |   +-- queue.js
+|   |   |   |   \-- userFileService.js
+|   |   |   +-- utils
+|   |   |   +-- websocket
+|   |   |   |   \-- progress.gateway.js
+|   |   |   \-- server.js
+|   |   +-- storage
+|   |   |   +-- temp
+|   |   |   \-- uploads
+|   |   +-- package.json
+|   |   \-- package-lock.json
+|   +-- web
+|   |   +-- assets
+|   |   |   +-- images
+|   |   |   \-- styles
+|   |   |       +-- pages
+|   |   |       \-- main.css
+|   |   +-- legacy
+|   |   |   +-- v1
+|   |   |   |   +-- app.js
+|   |   |   |   +-- download.js
+|   |   |   |   \-- player.js
+|   |   |   +-- download.js
+|   |   |   \-- musicPlayer.js
+|   |   +-- public
+|   |   |   +-- descargas.html
+|   |   |   +-- favicon.png
+|   |   |   +-- favoritos.html
+|   |   |   +-- historial.html
+|   |   |   +-- index.html
+|   |   |   +-- musica.html
+|   |   |   \-- perfil.html
+|   |   \-- src
+|   |       +-- app
+|   |       |   \-- main.js
+|   |       +-- core
+|   |       |   +-- api
+|   |       |   +-- auth
+|   |       |   |   +-- auth.js
+|   |       |   |   \-- session.js
+|   |       |   +-- storage
+|   |       |   |   \-- db.js
+|   |       |   \-- utils
+|   |       \-- features
+|   |           +-- download
+|   |           |   +-- download.js
+|   |           |   +-- downloadAudio.js
+|   |           |   +-- downloadState.js
+|   |           |   +-- downloadStatus.js
+|   |           |   \-- downloadVideo.js
+|   |           +-- downloads
+|   |           |   \-- downloadsPage.js
+|   |           +-- favorites
+|   |           +-- history
+|   |           |   \-- history.js
+|   |           +-- player
+|   |           |   +-- config.js
+|   |           |   +-- loader.js
+|   |           |   +-- player.js
+|   |           |   +-- playerUI.js
+|   |           |   \-- prebuffer.js
+|   |           +-- profile
+|   |           +-- search
+|   |           |   +-- search.js
+|   |           |   +-- searchHistory.js
+|   |           |   \-- searchHistoryPage.js
+|   |           +-- voice
+|   |           |   \-- voice.js
+|   |           \-- websocket
+|   |               \-- websocket.js
+|   \-- worker
+|       +-- src
+|       |   +-- downloader
+|       |   |   +-- cookies.txt
+|       |   |   +-- ffmpeg_runner.py
+|       |   |   +-- metadata.py
+|       |   |   +-- metadatav1.py
+|       |   |   +-- ytdlp_runner.py
+|       |   |   +-- ytdlp_runnerv1.py
+|       |   |   \-- ytdlp_runnerv2.py
+|       |   +-- models
+|       |   |   \-- job.py
+|       |   +-- services
+|       |   +-- storage
+|       |   |   +-- audio
+|       |   |   \-- videos
+|       |   +-- utils
+|       |   +-- cookies.txt
+|       |   \-- main.py
+|       +-- static
+|       |   \-- favicon.png
+|       +-- storage
+|       |   +-- audio
+|       |   +-- temp
+|       |   \-- videos
+|       +-- cookies.txt
+|       \-- requirements.txt
++-- backups
+|   \-- backup_ytdlp_20260310_144233.zip
++-- data
+|   +-- downloads
+|   +-- favorites
+|   +-- history
+|   +-- sessions
+|   \-- users
+|       +-- ronal.json
+|       +-- ronny.json
+|       \-- user.json
++-- docs
+|   \-- architecture.md
++-- logs
+|   \-- reorganizar_20260310_144225.log
++-- packages
+|   \-- shared
+|       +-- constants
+|       |   +-- events.js
+|       |   +-- roles.js
+|       |   \-- routes.js
+|       +-- schemas
+|       \-- types
++-- reports
+|   \-- estructura_limpia_20260310_144225.txt
++-- scripts
+|   +-- fix-paths.js
+|   \-- fix-paths-report.json
++-- auto.ps1
++-- Comenzar de nuevo - Jhovan Tomasevich (Letra) [VEsf5CfpLMI].mp3
++-- estructura.txt
+\-- reorganizar-ytdlp.ps1

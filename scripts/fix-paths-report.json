@@ -1,0 +1,317 @@
+{
+  "resumen": {
+    "filesScanned": 56,
+    "filesChanged": 9,
+    "totalReplacements": 77
+  },
+  "cambios": [
+    {
+      "file": "apps/api/src/routes/download.routes.js",
+      "label": "import: ../services/pythonClient -> ../services/pythonClient"
+    },
+    {
+      "file": "apps/api/src/routes/metadata.routes.js",
+      "label": "import: ../services/pythonClient -> ../services/pythonClient"
+    },
+    {
+      "file": "apps/api/src/routes/search.routes.js",
+      "label": "import: ../services/pythonClient -> ../services/pythonClient"
+    },
+    {
+      "file": "apps/api/src/routes/stream.routes.js",
+      "label": "import: ../services/pythonClient -> ../services/pythonClient"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "texto: python-worker/storage/audio -> apps/worker/storage/audio"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "texto: python-worker/storage/videos -> apps/worker/storage/videos"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "import: ./routes/search -> ./routes/search.routes"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "import: ./routes/metadata -> ./routes/metadata.routes"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "import: ./routes/download -> ./routes/download.routes"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "import: ./routes/stream -> ./routes/stream.routes"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "import: ./websocket/progress -> ./websocket/progress.gateway"
+    },
+    {
+      "file": "apps/api/src/server.js",
+      "label": "node-path: /[\"'`]frontend[\"'`]/g -> \"../../web/public\""
+    },
+    {
+      "file": "apps/api/src/services/pythonClient.js",
+      "label": "texto: node-api/services/pythonClient.js -> apps/api/src/services/pythonClient.js"
+    },
+    {
+      "file": "apps/web/public/index.html",
+      "label": "html: /href=[\"']styles\\.css[\"']/g -> href=\"../assets/styles/main.css\""
+    },
+    {
+      "file": "apps/web/public/index.html",
+      "label": "html: /src=[\"']js\\/main\\.js[\"']/g -> src=\"../src/app/main.js\""
+    },
+    {
+      "file": "apps/web/public/index.html",
+      "label": "html: /href=[\"']favicon\\.png[\"']/g -> href=\"./favicon.png\""
+    },
+    {
+      "file": "apps/web/public/musica.html",
+      "label": "html: /href=[\"']styles\\.css[\"']/g -> href=\"../assets/styles/main.css\""
+    },
+    {
+      "file": "apps/web/src/app/main.js",
+      "label": "import: ./search.js -> ../features/search/search.js"
+    },
+    {
+      "file": "apps/web/src/app/main.js",
+      "label": "import: ./voice.js -> ../features/voice/voice.js"
+    },
+    {
+      "file": "apps/web/src/app/main.js",
+      "label": "import: ./websocket.js -> ../features/websocket/websocket.js"
+    },
+    {
+      "file": "apps/web/src/app/main.js",
+      "label": "import: ./download/download.js -> ../features/download/download.js"
+    },
+    {
+      "file": "apps/web/src/app/main.js",
+      "label": "import: ./player/player.js -> ../features/player/player.js"
+    },
+    {
+      "file": "apps/web/src/features/player/loader.js",
+      "label": "import: ./ui.js -> ./playerUI.js"
+    },
+    {
+      "file": "apps/web/src/features/player/player.js",
+      "label": "import: ./ui.js -> ./playerUI.js"
+    },
+    {
+      "file": "apps/worker/src/downloader/ytdlp_runner.py",
+      "label": "python-path: /[\"'`]cookies\\.txt[\"'`]/g -> \"../cookies.txt\""
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/index.html -> apps/web/public/index.html"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/musica.html -> apps/web/public/musica.html"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/perfil.html -> apps/web/public/perfil.html"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/historial.html -> apps/web/public/historial.html"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/favoritos.html -> apps/web/public/favoritos.html"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/descargas.html -> apps/web/public/descargas.html"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/favicon.png -> apps/web/public/favicon.png"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/styles.css -> apps/web/assets/styles/main.css"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/auth.js -> apps/web/src/core/auth/auth.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/session.js -> apps/web/src/core/auth/session.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/db.js -> apps/web/src/core/storage/db.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/main.js -> apps/web/src/app/main.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/search.js -> apps/web/src/features/search/search.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/voice.js -> apps/web/src/features/voice/voice.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/websocket.js -> apps/web/src/features/websocket/websocket.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/player/config.js -> apps/web/src/features/player/config.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/player/loader.js -> apps/web/src/features/player/loader.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/player/player.js -> apps/web/src/features/player/player.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/player/prebuffer.js -> apps/web/src/features/player/prebuffer.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/player/ui.js -> apps/web/src/features/player/playerUI.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/download/download.js -> apps/web/src/features/download/download.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/download/downloadAudio.js -> apps/web/src/features/download/downloadAudio.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/download/downloadState.js -> apps/web/src/features/download/downloadState.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/download/downloadStatus.js -> apps/web/src/features/download/downloadStatus.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/download/downloadVideo.js -> apps/web/src/features/download/downloadVideo.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/downloadsPage.js -> apps/web/src/features/downloads/downloadsPage.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/musicPlayer.js -> apps/web/legacy/musicPlayer.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/download.js -> apps/web/legacy/download.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/v1/app.js -> apps/web/legacy/v1/app.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/v1/download.js -> apps/web/legacy/v1/download.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: frontend/js/v1/player.js -> apps/web/legacy/v1/player.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/server.js -> apps/api/src/server.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/routes/search.js -> apps/api/src/routes/search.routes.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/routes/metadata.js -> apps/api/src/routes/metadata.routes.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/routes/stream.js -> apps/api/src/routes/stream.routes.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/routes/download.js -> apps/api/src/routes/download.routes.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/services/pythonClient.js -> apps/api/src/services/pythonClient.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/services/queue.js -> apps/api/src/services/queue.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/websocket/progress.js -> apps/api/src/websocket/progress.gateway.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/uploads -> apps/api/storage/uploads"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: node-api/download.js -> apps/api/src/services/download.legacy.js"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/main.py -> apps/worker/src/main.py"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/downloader/ffmpeg_runner.py -> apps/worker/src/downloader/ffmpeg_runner.py"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/downloader/metadata.py -> apps/worker/src/downloader/metadata.py"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/downloader/ytdlp_runner.py -> apps/worker/src/downloader/ytdlp_runner.py"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/downloader/cookies.txt -> apps/worker/src/downloader/cookies.txt"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/models/job.py -> apps/worker/src/models/job.py"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/static/favicon.png -> apps/worker/static/favicon.png"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/storage/audio -> apps/worker/storage/audio"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/storage/videos -> apps/worker/storage/videos"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/requeriments.txt -> apps/worker/requirements.txt"
+    },
+    {
+      "file": "scripts/fix-paths.js",
+      "label": "texto: python-worker/cookies.txt -> apps/worker/cookies.txt"
+    }
+  ]
+}

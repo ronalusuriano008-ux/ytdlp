@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Música</title>
+
+  <link rel="stylesheet" href="../assets/styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <main class="content">
+
+      <!-- ===== Buscador ===== -->
+      <div id="searchContainer">
+        <input id="searchInput" type="text" placeholder="Buscar música...">
+
+        <button id="searchBtn" type="button">
+          <i class="fas fa-search"></i> Buscar
+        </button>
+      </div>
+
+      <p id="searchStatus" style="display:none; margin-top:10px;">
+        <i class="fas fa-spinner fa-spin"></i> Buscando...
+      </p>
+
+      <!-- ===== Navegación ===== -->
+      <div class="sections-bar">
+
+        <a href="index.html" class="section-btn">
+          <i class="fas fa-house"></i>
+          <span>Inicio</span>
+        </a>
+
+        <a href="musica.html" class="section-btn">
+          <i class="fas fa-music"></i>
+          <span>Música</span>
+        </a>
+
+        <a href="historial.html" class="section-btn">
+          <i class="fas fa-clock-rotate-left"></i>
+          <span>Historial</span>
+        </a>
+
+        <a href="favoritos.html" class="section-btn">
+          <i class="fas fa-heart"></i>
+          <span>Favoritos</span>
+        </a>
+
+        <a href="descargas.html" class="section-btn">
+          <i class="fas fa-circle-down"></i>
+          <span>Descargas</span>
+        </a>
+
+        <a href="perfil.html" class="section-btn">
+          <i class="fas fa-user"></i>
+          <span>Perfil</span>
+        </a>
+
+      </div>
+
+      <!-- ===== Reproductor ===== -->
+      <div class="video-card">
+        <div class="video-wrapper">
+          <img id="coverImage" alt="Portada" style="width:100%; max-width:320px; border-radius:12px; display:block; margin:auto;">
+
+          <audio id="player" controls preload="auto"></audio>
+          <audio id="preloadPlayer" preload="auto" style="display:none;"></audio>
+        </div>
+
+        <div class="video-info">
+          <h4 id="videoMainTitle"></h4>
+          <h5 id="videoSubTitle"></h5>
+
+          <div class="controller">
+            <button type="button" class="control-btn seek-back">
+              <i class="fas fa-rotate-left"></i>
+            </button>
+
+            <button type="button" id="prevBtn" class="control-btn prev-btn">
+              <i class="fas fa-step-backward"></i>
+            </button>
+
+            <button type="button" id="playPauseBtn" class="control-btn play-btn">
+              <i class="fas fa-play"></i>
+            </button>
+
+            <button type="button" id="nextBtn" class="control-btn next-btn">
+              <i class="fas fa-step-forward"></i>
+            </button>
+
+            <button type="button" class="control-btn seek-forward">
+              <i class="fas fa-rotate-right"></i>
+            </button>
+          </div>
+
+          <!-- si luego quieres descargas también -->
+          <div id="downloadContainer" class="download-container hidden"></div>
+        </div>
+      </div>
+
+      <!-- ===== Resultados ===== -->
+      <div id="results"></div>
+
+    </main>
+  </div>
+
+  <script type="module">
+  import { initSearch } from "/src/features/search/search.js";
+  import { initMusicPlayer } from "/legacy/musicPlayer.js";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initSearch();
+    initMusicPlayer();
+  });
+</script>
+
+</body>
+</html>

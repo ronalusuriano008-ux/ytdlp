@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historial</title>
+
+<style>
+:root{
+  --bg-main:#0f172a;
+  --bg-secondary:#111827;
+  --card-bg:#1e293b;
+  --card-hover:#273449;
+  --text-primary:#f1f5f9;
+  --text-secondary:#cbd5e1;
+  --accent-blue:#3b82f6;
+}
+
+body{
+  margin:0;
+  background:linear-gradient(135deg,var(--bg-main),var(--bg-secondary));
+  color:var(--text-primary);
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.section{
+  padding:30px;
+}
+
+h2{
+  color:var(--accent-blue);
+  margin-bottom:20px;
+}
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.item{
+  padding:15px;
+  background:var(--card-bg);
+  border-radius:12px;
+  transition:.3s;
+}
+
+.item:hover{
+  background:var(--card-hover);
+}
+
+.item h3{
+  margin:0 0 8px 0;
+  font-size:16px;
+}
+
+.item p{
+  margin:4px 0;
+  color:var(--text-secondary);
+  font-size:14px;
+}
+
+.item button{
+  margin-top:10px;
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  background:var(--accent-blue);
+  color:white;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.item button:hover{
+  opacity:.9;
+}
+
+.empty{
+  color:var(--text-secondary);
+  background:var(--card-bg);
+  padding:16px;
+  border-radius:12px;
+}
+
+.error{
+  color:#f87171;
+  background:var(--card-bg);
+  padding:16px;
+  border-radius:12px;
+}
+</style>
+</head>
+<body>
+
+<section class="section">
+  <h2>Historial</h2>
+  <div class="list" id="list"></div>
+</section>
+
+<script type="module">
+import { getHistory } from "/src/features/history/history.js";
+
+const list = document.getElementById("list");
+
+function formatDate(value) {
+  if (!value) return "Sin fecha";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "Fecha inválida";
+  return date.toLocaleString("es-PE");
+}
+
+async function renderHistory() {
+  list.innerHTML = `<div class="empty">Cargando historial...</div>`;
+
+  try {
+    const history = await getHistory();
+
+    list.innerHTML = "";
+
+    if (!history || history.length === 0) {
+      list.innerHTML = `<div class="empty">No hay elementos en el historial.</div>`;
+      return;
+    }
+
+    history.forEach((item) => {
+      const div = document.createElement("div");
+      div.className = "item";
+
+      div.innerHTML = `
+        <h3>${item.title || "Sin título"}</h3>
+        <p><strong>Tipo:</strong> ${item.type || "desconocido"}</p>
+        <p><strong>Fecha:</strong> ${formatDate(item.date)}</p>
+      `;
+
+      const btn = document.createElement("button");
+      btn.textContent = "Abrir";
+      btn.addEventListener("click", () => {
+        if (item.url) {
+          window.open(item.url, "_blank");
+        }
+      });
+
+      div.appendChild(btn);
+      list.appendChild(div);
+    });
+  } catch (error) {
+    console.error("Error cargando historial:", error);
+    list.innerHTML = `<div class="error">No se pudo cargar el historial.</div>`;
+  }
+}
+
+renderHistory();
+</script>
+
+</body>
+</html>

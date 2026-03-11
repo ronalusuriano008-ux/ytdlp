@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descargas</title>
+
+<style>
+:root{
+  --bg-main:#0f172a;
+  --bg-secondary:#111827;
+  --card-bg:#1e293b;
+  --card-hover:#273449;
+  --text-primary:#f1f5f9;
+  --accent-blue:#3b82f6;
+  --accent-green:#10b981;
+}
+
+body{
+  margin:0;
+  background:linear-gradient(135deg,var(--bg-main),var(--bg-secondary));
+  color:var(--text-primary);
+  font-family:Arial;
+}
+
+.section{padding:30px;}
+h2{color:var(--accent-blue);}
+
+.item{
+  background:var(--card-bg);
+  padding:18px;
+  border-radius:12px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+button{
+  background:var(--accent-green);
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<section class="section">
+<h2>Descargas</h2>
+<div id="downloads"></div>
+</section>
+<script type="module" src="/src/features/downloads/downloadsPage.js"></script>
+</body>
+</html>
