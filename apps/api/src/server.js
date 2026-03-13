@@ -1,18 +1,44 @@
 const os = require("os");
 const express = require("express");
 const cors = require("cors");
-const http = require("http");
 const path = require("path");
 const fs = require("fs");
 const gradient = require("gradient-string");
 
 require("dotenv").config();
 
+const search = require("./routes/search.routes");
+const metadata = require("./routes/metadata.routes");
+const download = require("./routes/download.routes");
+const stream = require("./routes/stream.routes");
+const auth = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
+
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
+const NODE_ENV = process.env.NODE_ENV || "development";
+const isDev = NODE_ENV !== "production";
+
+const WEB_PUBLIC = path.join(__dirname, "../../web/public");
+const WEB_ASSETS = path.join(__dirname, "../../web/assets");
+const WEB_SRC = path.join(__dirname, "../../web/src");
+
+app.use("/src", express.static(WEB_SRC));
+
+const API_TEMP = path.join(__dirname, "../storage/temp");
+const API_UPLOADS = path.join(__dirname, "../storage/uploads");
+
+const WORKER_AUDIO = path.join(__dirname, "../../worker/storage/audio");
+const WORKER_VIDEOS = path.join(__dirname, "../../worker/storage/videos");
+const WORKER_TEMP = path.join(__dirname, "../../worker/storage/temp");
+
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
 
   for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
+    for (const iface of interfaces[name] || []) {
       if (iface.family === "IPv4" && !iface.internal) {
         return iface.address;
       }
@@ -22,75 +48,59 @@ function getLocalIP() {
   return "127.0.0.1";
 }
 
-const text = `YT Music Downloader`;
+function ensureDir(dirPath) {
+  try {
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+  } catch (error) {
+    console.error(`No se pudo crear la carpeta: ${dirPath}`);
+    console.error(error.message);
+    process.exit(1);
+  }
+}
 
-const search = require("./routes/search.routes");
-const metadata = require("./routes/metadata.routes");
-const download = require("./routes/download.routes");
-const stream = require("./routes/stream.routes");
-const auth = require("./routes/auth.routes");
-const userRoutes = require("./routes/user.routes");
-const ws = require("./websocket/progress.gateway");
+function bootstrapStorage() {
+  [
+    API_TEMP,
+    API_UPLOADS,
+    WORKER_AUDIO,
+    WORKER_VIDEOS,
+    WORKER_TEMP
+  ].forEach(ensureDir);
+}
 
-const app = express();
+bootstrapStorage();
 
-// ===== Config base =====
+// Middlewares base
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.raw({ type: "audio/wav", limit: "10mb" }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ===== Logger global =====
+// Logger simple y seguro
 app.use((req, res, next) => {
   const start = Date.now();
 
-  console.log("\n📥 ===== NUEVA PETICIÓN =====");
-  console.log("Método:", req.method);
-  console.log("Ruta:", req.originalUrl);
-  console.log("IP:", req.ip);
-  console.log("User-Agent:", req.headers["user-agent"]);
-/*
-  console.log("Headers:");
-  console.log(req.headers);
-*/
-  if (Object.keys(req.query || {}).length > 0) {
-    console.log("Query Params:");
-    console.log(req.query);
-  }
-
-  if (req.body && typeof req.body === "object" && Object.keys(req.body).length > 0) {
-    console.log("Body:");
-    console.log(req.body);
+  if (isDev) {
+    console.log(`[REQ] ${req.method} ${req.originalUrl} - ${req.ip}`);
   }
 
   res.on("finish", () => {
     const duration = Date.now() - start;
 
-    console.log("\n📤 ===== RESPUESTA =====");
-    console.log("Status:", res.statusCode);
-    console.log("Tiempo:", duration + " ms");
-    console.log("========================\n");
+    if (isDev) {
+      console.log(`[RES] ${req.method} ${req.originalUrl} - ${res.statusCode} - ${duration}ms`);
+    }
   });
 
   next();
 });
 
-// ===== Rutas del proyecto =====
-const WEB_PUBLIC = path.join(__dirname, "../../web/public");
-const WEB_ASSETS = path.join(__dirname, "../../web/assets");
-const WEB_SRC = path.join(__dirname, "../../web/src");
-const WEB_LEGACY = path.join(__dirname, "../../web/legacy");
-
-const WORKER_AUDIO = path.join(__dirname, "../../worker/storage/audio");
-const WORKER_VIDEOS = path.join(__dirname, "../../worker/storage/videos");
-
-// ===== Archivos estáticos =====
+// Archivos estáticos
 app.use(express.static(WEB_PUBLIC));
 app.use("/assets", express.static(WEB_ASSETS));
-app.use("/src", express.static(WEB_SRC));
-app.use("/legacy", express.static(WEB_LEGACY));
 
-// ===== API =====
+// Rutas API
 app.use("/auth", auth);
 app.use("/user", userRoutes);
 app.use("/search", search);
@@ -98,86 +108,69 @@ app.use("/metadata", metadata);
 app.use("/download", download);
 app.use("/stream", stream);
 
-// ===== Ruta principal =====
-app.get("/", (req, res) => {
-  console.log("🖥 Usuario cargó el frontend desde:", req.ip);
-  res.sendFile(path.join(WEB_PUBLIC, "index.html"));
-});
-
-const server = http.createServer(app);
-
-// ===== Eventos del servidor =====
-server.on("connection", (socket) => {
-  console.log("\n🔌 ===== CONEXIÓN TCP =====");
-  console.log("Cliente:", socket.remoteAddress);
-
-  socket.on("close", () => {
-    console.log("❌ Conexión TCP cerrada:", socket.remoteAddress);
+// Health check para despliegue
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: "downloader-api",
+    env: NODE_ENV,
+    uptime: process.uptime()
   });
 });
 
-server.on("error", (err) => {
-  console.error("🚨 Error en servidor HTTP:", err);
+// Ruta principal
+app.get("/", (req, res) => {
+  res.sendFile(path.join(WEB_PUBLIC, "index.html"));
 });
 
-// ===== WebSocket =====
-ws.init(server);
-console.log("📡 WebSocket inicializado");
+// 404
+app.use((req, res) => {
+  res.status(404).json({
+    ok: false,
+    error: "Ruta no encontrada"
+  });
+});
 
-// ===== Arranque =====
-server.listen(3000, "0.0.0.0", () => {
+// Error global
+app.use((err, req, res, next) => {
+  console.error("[ERROR]", err);
+
+  res.status(err.status || 500).json({
+    ok: false,
+    error: err.message || "Error interno del servidor"
+  });
+});
+
+app.listen(PORT, HOST, () => {
   const localIP = getLocalIP();
 
-  console.log(gradient.pastel.multiline(text));
-  console.log(gradient.instagram("Servidor listo en la red local"));
-  console.log(`👉 http://${localIP}:3000`);
+  console.log(gradient.pastel.multiline("YT Music Downloader API"));
+  console.log(`Modo: ${NODE_ENV}`);
+  console.log(`Servidor escuchando en ${HOST}:${PORT}`);
+
+  if (isDev) {
+    console.log(`Local: http://127.0.0.1:${PORT}`);
+    console.log(`Red local: http://${localIP}:${PORT}`);
+  }
 });
 
-// ===== Monitoreo =====
-setInterval(() => {
-  const memory = process.memoryUsage();
-  const usedMB = (memory.rss / 1024 / 1024).toFixed(2);
-  const cpu = os.loadavg()[0].toFixed(2);
-
-  console.log("\n📊 ===== MONITOR SERVIDOR =====");
-  console.log("Memoria usada:", usedMB + " MB");
-  console.log("CPU load:", cpu);
-  console.log("PID:", process.pid);
-  console.log("================================\n");
-}, 30000);
-
-setInterval(() => {
-  try {
-    const audioFiles = fs.existsSync(WORKER_AUDIO)
-      ? fs.readdirSync(WORKER_AUDIO).length
-      : 0;
-
-    const videoFiles = fs.existsSync(WORKER_VIDEOS)
-      ? fs.readdirSync(WORKER_VIDEOS).length
-      : 0;
-
-    console.log("📁 Archivos audio:", audioFiles);
-    console.log("📁 Archivos video:", videoFiles);
-  } catch (err) {
-    console.log("⚠ No se pudo leer storage:", err.message);
-  }
-}, 60000);
-
-// ===== Manejo de cierre y errores =====
+// Cierre limpio
 process.on("SIGINT", () => {
-  console.log("\n🛑 Servidor detenido manualmente (CTRL+C)");
-  process.exit();
+  console.log("\nServidor detenido manualmente");
+  process.exit(0);
 });
 
 process.on("SIGTERM", () => {
-  console.log("🛑 Señal SIGTERM recibida");
-  process.exit();
+  console.log("Servidor detenido por SIGTERM");
+  process.exit(0);
 });
 
 process.on("uncaughtException", (err) => {
-  console.error("🚨 Excepción no capturada:", err);
+  console.error("Excepción no capturada:", err);
+  process.exit(1);
 });
 
-process.on("unhandledRejection", (err) => {
-  console.error("🚨 Rechazo de promesa no manejado:", err);
+process.on("unhandledRejection", (reason) => {
+  console.error("Promesa rechazada no manejada:", reason);
+  process.exit(1);
 });

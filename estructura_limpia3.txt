@@ -1,0 +1,116 @@
+﻿├── apps
+├── backups
+├── docs
+├── packages
+├── reports
+├── scripts
+├── src
+├── .gitignore
+├── estructura_limpia3.txt
+│   ├── api
+│   ├── web
+│   ├── worker
+│   │   ├── src
+│   │   ├── storage
+│   │   ├── .env
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   │   ├── routes
+│   │   │   ├── services
+│   │   │   ├── websocket
+│   │   │   ├── server.js
+│   │   │   │   ├── auth.routes.js
+│   │   │   │   ├── download.routes.js
+│   │   │   │   ├── metadata.routes.js
+│   │   │   │   ├── search.routes.js
+│   │   │   │   ├── stream.routes.js
+│   │   │   │   ├── user.routes.js
+│   │   │   │   ├── download.legacy.js
+│   │   │   │   ├── pythonClient.js
+│   │   │   │   ├── queue.js
+│   │   │   │   ├── userFileService.js
+│   │   │   │   ├── progress.gateway.js
+│   │   │   ├── temp
+│   │   │   ├── uploads
+│   │   ├── assets
+│   │   ├── legacy
+│   │   ├── public
+│   │   ├── src
+│   │   │   ├── styles
+│   │   │   │   ├── main.css
+│   │   │   │   ├── mainv1.css
+│   │   │   ├── v1
+│   │   │   ├── download.js
+│   │   │   ├── musicPlayer.js
+│   │   │   │   ├── app.js
+│   │   │   │   ├── download.js
+│   │   │   │   ├── player.js
+│   │   │   ├── js
+│   │   │   ├── descargas.html
+│   │   │   ├── favicon.png
+│   │   │   ├── favoritos.html
+│   │   │   ├── historial.html
+│   │   │   ├── index.html
+│   │   │   ├── musica.html
+│   │   │   ├── perfil.html
+│   │   │   │   ├── main.js
+│   │   │   ├── app
+│   │   │   ├── core
+│   │   │   ├── features
+│   │   │   │   ├── auth
+│   │   │   │   │   ├── auth.js
+│   │   │   │   │   ├── session.js
+│   │   │   │   ├── download
+│   │   │   │   ├── downloads
+│   │   │   │   ├── history
+│   │   │   │   ├── player
+│   │   │   │   ├── search
+│   │   │   │   ├── voice
+│   │   │   │   ├── websocket
+│   │   │   │   │   ├── download.js
+│   │   │   │   │   ├── downloadAudio.js
+│   │   │   │   │   ├── downloadState.js
+│   │   │   │   │   ├── downloadStatus.js
+│   │   │   │   │   ├── downloadVideo.js
+│   │   │   │   │   ├── downloadsPage.js
+│   │   │   │   │   ├── history.js
+│   │   │   │   │   ├── config.js
+│   │   │   │   │   ├── loader.js
+│   │   │   │   │   ├── player.js
+│   │   │   │   │   ├── playerUI.js
+│   │   │   │   │   ├── prebuffer.js
+│   │   │   │   │   ├── search.js
+│   │   │   │   │   ├── searchHistory.js
+│   │   │   │   │   ├── searchHistoryPage.js
+│   │   │   │   │   ├── voice.js
+│   │   │   │   │   ├── websocket.js
+│   │   ├── src
+│   │   ├── static
+│   │   ├── storage
+│   │   ├── requirements.txt
+│   │   │   ├── downloader
+│   │   │   ├── models
+│   │   │   ├── main.py
+│   │   │   │   ├── ffmpeg_runner.py
+│   │   │   │   ├── metadata.py
+│   │   │   │   ├── metadatav1.py
+│   │   │   │   ├── ytdlp_runner.py
+│   │   │   │   ├── ytdlp_runnerv1.py
+│   │   │   │   ├── ytdlp_runnerv2.py
+│   │   │   │   ├── job.py
+│   │   │   ├── favicon.png
+│   │   │   ├── audio
+│   │   │   ├── temp
+│   │   │   ├── videos
+│   ├── backup_ytdlp_20260310_144233.zip
+│   ├── architecture.md
+│   ├── shared
+│   │   ├── constants
+│   │   │   ├── events.js
+│   │   │   ├── roles.js
+│   │   │   ├── routes.js
+│   ├── estructura_limpia_20260310_144225.txt
+│   ├── fix-paths-report.json
+│   ├── fix-paths.js
+│   ├── app
+│   │   ├── main.js

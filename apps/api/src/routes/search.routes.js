@@ -4,57 +4,91 @@ const python = require("../services/pythonClient");
 const cache = new Map();
 const CACHE_TTL = 1000 * 60 * 5;
 const MAX_QUERY_LENGTH = 100;
+const MAX_CACHE_ITEMS = 200;
+
+function pruneCache() {
+  const now = Date.now();
+
+  for (const [key, value] of cache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      cache.delete(key);
+    }
+  }
+
+  while (cache.size > MAX_CACHE_ITEMS) {
+    const oldestKey = cache.keys().next().value;
+    cache.delete(oldestKey);
+  }
+}
 
 router.get("/", async (req, res) => {
   try {
-    const query = (req.query.q || "").trim();
+    const query = String(req.query.q || "").trim();
 
     if (!query) {
-      return res.status(400).json({ error: "No query provided" });
+      return res.status(400).json({
+        ok: false,
+        error: "No query provided"
+      });
     }
 
     if (query.length > MAX_QUERY_LENGTH) {
-      return res.status(400).json({ error: "Query too long" });
+      return res.status(400).json({
+        ok: false,
+        error: "Query too long"
+      });
     }
 
     const cacheKey = query.toLowerCase();
+    pruneCache();
 
-    if (cache.has(cacheKey)) {
-      const { data, timestamp } = cache.get(cacheKey);
-
-      if (Date.now() - timestamp < CACHE_TTL) {
-        return res.json(data);
-      }
-
-      cache.delete(cacheKey);
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      res.set("Cache-Control", "public, max-age=300");
+      return res.json({
+        ok: true,
+        results: cached.data
+      });
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const results = await python.call("search", { query });
 
-    const data = await python.call("search", { query }, { signal: controller.signal });
+    console.log("[search] worker result:", results);
+    console.log("[search] isArray:", Array.isArray(results));
 
-    clearTimeout(timeout);
-
-    if (!data || !Array.isArray(data.results)) {
-      return res.status(502).json({ error: "Invalid response from worker" });
+    if (!Array.isArray(results)) {
+      return res.status(502).json({
+        ok: false,
+        error: "Invalid response from worker"
+      });
     }
 
     cache.set(cacheKey, {
-      data,
-      timestamp: Date.now(),
+      data: results,
+      timestamp: Date.now()
     });
 
     res.set("Cache-Control", "public, max-age=300");
-    res.json(data);
-
+    return res.json({
+      ok: true,
+      results
+    });
   } catch (err) {
-    if (err.name === "AbortError") {
-      return res.status(504).json({ error: "Search timeout" });
+    const isTimeout = String(err.message || "").toLowerCase().includes("timeout");
+
+    if (isTimeout) {
+      return res.status(504).json({
+        ok: false,
+        error: "Search timeout"
+      });
     }
 
     console.error("[search] Error:", err.message);
-    res.status(500).json({ error: "Internal server error" });
+
+    return res.status(500).json({
+      ok: false,
+      error: "Internal server error"
+    });
   }
 });
 

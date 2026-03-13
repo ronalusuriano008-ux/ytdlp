@@ -2,60 +2,81 @@ const router = require("express").Router();
 const python = require("../services/pythonClient");
 
 const cache = new Map();
-const CACHE_TTL = 1000 * 60 * 15; // 15 minutos
+const CACHE_TTL = 1000 * 60 * 15;
+const MAX_CACHE_ITEMS = 300;
+
+function pruneCache() {
+  const now = Date.now();
+
+  for (const [key, value] of cache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      cache.delete(key);
+    }
+  }
+
+  while (cache.size > MAX_CACHE_ITEMS) {
+    const oldestKey = cache.keys().next().value;
+    cache.delete(oldestKey);
+  }
+}
 
 router.get("/", async (req, res) => {
   try {
-    const url = (req.query.url || "").trim();
+    const url = String(req.query.url || "").trim();
 
     if (!url) {
-      return res.status(400).json({ error: "No url provided" });
+      return res.status(400).json({
+        ok: false,
+        error: "No url provided"
+      });
     }
 
-    const cacheKey = url;
+    pruneCache();
 
-    // 🔥 Cache en memoria
-    if (cache.has(cacheKey)) {
-      const { data, timestamp } = cache.get(cacheKey);
-
-      if (Date.now() - timestamp < CACHE_TTL) {
-        return res.json(data);
-      }
-
-      cache.delete(cacheKey);
+    const cached = cache.get(url);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      res.set("Cache-Control", "public, max-age=900");
+      return res.json({
+        ok: true,
+        data: cached.data
+      });
     }
 
-    // ⏱ Timeout controlado
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-
-    const data = await python.call(
-      "metadata",
-      { url },
-      { signal: controller.signal }
-    );
-
-    clearTimeout(timeout);
+    const data = await python.call("metadata", { url });
 
     if (!data) {
-      return res.status(502).json({ error: "Invalid response from worker" });
+      return res.status(502).json({
+        ok: false,
+        error: "Invalid response from worker"
+      });
     }
 
-    // 🚀 Guardar en cache
-    cache.set(cacheKey, {
+    cache.set(url, {
       data,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     });
 
     res.set("Cache-Control", "public, max-age=900");
-    res.json(data);
+    return res.json({
+      ok: true,
+      data
+    });
+  } catch (err) {
+    const isTimeout = String(err.message || "").toLowerCase().includes("timeout");
 
-  } catch (e) {
-    if (e.name === "AbortError") {
-      return res.status(504).json({ error: "Metadata timeout" });
+    if (isTimeout) {
+      return res.status(504).json({
+        ok: false,
+        error: "Metadata timeout"
+      });
     }
 
-    res.status(500).json({ error: e.message });
+    console.error("[metadata] Error:", err.message);
+
+    return res.status(500).json({
+      ok: false,
+      error: err.message || "Internal server error"
+    });
   }
 });
 

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const USERS_DIR = path.join(__dirname, "../../../../data/users");
 
@@ -18,10 +19,26 @@ function sanitizeUsername(username) {
 
 function getUserFilePath(username) {
   const safeUsername = sanitizeUsername(username);
+
   if (!safeUsername) {
     throw new Error("Nombre de usuario inválido");
   }
+
   return path.join(USERS_DIR, `${safeUsername}.json`);
+}
+
+function hashPassword(password) {
+  return crypto
+    .createHash("sha256")
+    .update(String(password))
+    .digest("hex");
+}
+
+function toPublicUser(user) {
+  if (!user) return null;
+
+  const { password, ...safeUser } = user;
+  return safeUser;
 }
 
 function userExists(username) {
@@ -38,13 +55,21 @@ function readUser(username) {
     return null;
   }
 
-  const raw = fs.readFileSync(filePath, "utf8");
-  return JSON.parse(raw);
+  try {
+    const raw = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(raw);
+  } catch (error) {
+    throw new Error(`No se pudo leer el usuario: ${sanitizeUsername(username)}`);
+  }
 }
 
 function writeUser(username, data) {
   ensureUsersDir();
   const filePath = getUserFilePath(username);
+
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error("Datos de usuario inválidos");
+  }
 
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
   return data;
@@ -71,7 +96,7 @@ function createUser(username, password) {
 
   const userData = {
     username: safeUsername,
-    password: String(password),
+    password: hashPassword(password),
     role: "user",
     history: [],
     favorites: [],
@@ -81,7 +106,7 @@ function createUser(username, password) {
   };
 
   writeUser(safeUsername, userData);
-  return userData;
+  return toPublicUser(userData);
 }
 
 function validateUser(username, password) {
@@ -91,11 +116,13 @@ function validateUser(username, password) {
     throw new Error("Usuario no existe");
   }
 
-  if (user.password !== String(password)) {
+  const hashedPassword = hashPassword(password);
+
+  if (user.password !== hashedPassword) {
     throw new Error("Contraseña incorrecta");
   }
 
-  return user;
+  return toPublicUser(user);
 }
 
 function updateUser(username, updater) {
@@ -105,11 +132,29 @@ function updateUser(username, updater) {
     throw new Error("Usuario no existe");
   }
 
+  if (typeof updater !== "function") {
+    throw new Error("Updater inválido");
+  }
+
   const updatedUser = updater({ ...user });
+
+  if (!updatedUser || typeof updatedUser !== "object" || Array.isArray(updatedUser)) {
+    throw new Error("El updater devolvió un usuario inválido");
+  }
+
+  updatedUser.username = sanitizeUsername(updatedUser.username || user.username);
   updatedUser.updatedAt = new Date().toISOString();
 
+  if (!updatedUser.username) {
+    throw new Error("Nombre de usuario inválido");
+  }
+
+  if (!updatedUser.password) {
+    updatedUser.password = user.password;
+  }
+
   writeUser(username, updatedUser);
-  return updatedUser;
+  return toPublicUser(updatedUser);
 }
 
 module.exports = {
@@ -120,5 +165,6 @@ module.exports = {
   writeUser,
   createUser,
   validateUser,
-  updateUser
+  updateUser,
+  toPublicUser
 };

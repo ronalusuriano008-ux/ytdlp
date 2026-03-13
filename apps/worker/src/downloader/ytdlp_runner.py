@@ -1,30 +1,28 @@
 import subprocess
-import json
 import os
-import glob
 import requests
 import time
+import uuid
 
 # ========================
-# 📂 RUTAS
+# RUTAS
 # ========================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
-
-STORAGE_VIDEO = os.path.join(ROOT_DIR, "storage", "videos")
-STORAGE_AUDIO = os.path.join(ROOT_DIR, "storage", "audio")
-
-COOKIE_PATH = os.path.join(BASE_DIR, "../cookies.txt")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))                     # apps/worker/src/downloader
+WORKER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))         # apps/worker
+STORAGE_VIDEO = os.path.join(WORKER_DIR, "storage", "videos")
+STORAGE_AUDIO = os.path.join(WORKER_DIR, "storage", "audio")
+COOKIE_PATH = os.path.join(WORKER_DIR, "src", "cookies.txt")
 
 os.makedirs(STORAGE_VIDEO, exist_ok=True)
 os.makedirs(STORAGE_AUDIO, exist_ok=True)
 
 # ========================
-# ⚡ CACHE
+# CACHE
 # ========================
 
 STREAM_CACHE = {}
+STREAM_CACHE_TTL = 900
 
 SEARCH_CACHE = {}
 SEARCH_CACHE_TTL = 300
@@ -38,21 +36,13 @@ COMMON = [
     "--cookies", COOKIE_PATH,
     "--force-ipv4",
     "--retries", "10",
-]
-
-SEARCH_COMMON = [
-    "--skip-download",
-    "--flat-playlist",
-    "--quiet",
-    "--no-warnings"
+    "--restrict-filenames"
 ]
 
 # ========================
-# 🌐 CONFIG YOUTUBEI
+# CONFIG YOUTUBEI
 # ========================
 
-# Este client suele funcionar bien para búsquedas.
-# Si algún día cambia, normalmente bastará ajustar clientVersion.
 YOUTUBEI_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
 
 YOUTUBE_HEADERS = {
@@ -79,7 +69,7 @@ YOUTUBEI_PAYLOAD_CONTEXT = {
 }
 
 # ========================
-# 🧩 HELPERS GENERALES
+# HELPERS
 # ========================
 
 def safe_get(data, *keys, default=None):
@@ -181,8 +171,44 @@ def prune_search_cache():
         SEARCH_CACHE.pop(oldest_key, None)
 
 
+def prune_stream_cache():
+    now = time.time()
+    expired_keys = [
+        key for key, item in STREAM_CACHE.items()
+        if now - item["time"] > STREAM_CACHE_TTL
+    ]
+
+    for key in expired_keys:
+        STREAM_CACHE.pop(key, None)
+
+
+def ensure_url(data):
+    url = str((data or {}).get("url", "")).strip()
+    if not url:
+        raise ValueError("Missing url")
+    return url
+
+
+def build_output_template(storage_dir, prefix):
+    unique_id = uuid.uuid4().hex[:12]
+    return os.path.join(storage_dir, f"{prefix}_{unique_id}.%(ext)s")
+
+
+def find_generated_file(storage_dir, prefix):
+    matches = [
+        os.path.join(storage_dir, name)
+        for name in os.listdir(storage_dir)
+        if name.startswith(prefix + "_")
+    ]
+
+    if not matches:
+        raise FileNotFoundError("No se generó ningún archivo")
+
+    return max(matches, key=os.path.getctime)
+
+
 # ========================
-# 🧩 HELPERS SEARCH youtubei
+# HELPERS SEARCH
 # ========================
 
 def parse_video_renderer(video):
@@ -193,10 +219,7 @@ def parse_video_renderer(video):
     if not video_id:
         return None
 
-    title = (
-        get_text(video.get("title")) or
-        get_text(video.get("headline"))
-    )
+    title = get_text(video.get("title")) or get_text(video.get("headline"))
     if not title:
         return None
 
@@ -214,7 +237,6 @@ def parse_video_renderer(video):
     )
 
     duration = parse_duration_to_seconds(duration_text)
-
     thumbnails = safe_get(video, "thumbnail", "thumbnails", default=[])
     thumbnail = get_best_thumbnail(video_id, thumbnails)
 
@@ -235,25 +257,21 @@ def extract_items_from_section_list(contents, results):
         if not isinstance(item, dict):
             continue
 
-        # Resultado normal
         if "videoRenderer" in item:
             parsed = parse_video_renderer(item["videoRenderer"])
             if parsed:
                 results.append(parsed)
 
-        # Rich renderer
         rich_video = safe_get(item, "richItemRenderer", "content", "videoRenderer")
         if isinstance(rich_video, dict):
             parsed = parse_video_renderer(rich_video)
             if parsed:
                 results.append(parsed)
 
-        # Item section
         nested_item_section = safe_get(item, "itemSectionRenderer", "contents", default=[])
         if isinstance(nested_item_section, list):
             extract_items_from_section_list(nested_item_section, results)
 
-        # Shelf / listas verticales
         nested_shelf_items = safe_get(
             item,
             "shelfRenderer",
@@ -265,7 +283,6 @@ def extract_items_from_section_list(contents, results):
         if isinstance(nested_shelf_items, list):
             extract_items_from_section_list(nested_shelf_items, results)
 
-        # Secciones más profundas
         nested_section_list = safe_get(item, "sectionListRenderer", "contents", default=[])
         if isinstance(nested_section_list, list):
             extract_items_from_section_list(nested_section_list, results)
@@ -314,9 +331,8 @@ def do_youtubei_search(query):
     response.raise_for_status()
     return response.json()
 
-
 # ========================
-# 🔎 SEARCH con youtubei/v1/search
+# SEARCH
 # ========================
 
 def search(query):
@@ -332,7 +348,6 @@ def search(query):
         return {"results": cached["results"]}
 
     data = do_youtubei_search(query)
-
     contents = extract_search_contents(data)
 
     results = []
@@ -357,17 +372,17 @@ def search(query):
 
     return {"results": unique}
 
-
 # ========================
-# 🔴 STREAM URL (rápido)
+# STREAM URL
 # ========================
 
 def stream_url(data):
-    url = data["url"]
+    url = ensure_url(data)
+    prune_stream_cache()
 
-    # ⚡ CACHE
-    if url in STREAM_CACHE:
-        return {"directUrl": STREAM_CACHE[url]}
+    cached = STREAM_CACHE.get(url)
+    if cached and (time.time() - cached["time"] <= STREAM_CACHE_TTL):
+        return {"directUrl": cached["value"]}
 
     cmd = [
         "yt-dlp",
@@ -380,35 +395,36 @@ def stream_url(data):
         url
     ]
 
-    process = subprocess.Popen(
+    process = subprocess.run(
         cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace"
     )
 
-    stdout, stderr = process.communicate()
-
     if process.returncode != 0:
-        raise Exception(stderr)
+        raise Exception(process.stderr.strip() or "No se pudo obtener directUrl")
 
-    direct_url = stdout.strip().splitlines()[0]
+    direct_url = process.stdout.strip().splitlines()[0]
 
-    STREAM_CACHE[url] = direct_url
+    STREAM_CACHE[url] = {
+        "time": time.time(),
+        "value": direct_url
+    }
 
     return {
         "directUrl": direct_url
     }
 
-
 # ========================
-# 🎬 DOWNLOAD VIDEO
+# DOWNLOAD VIDEO
 # ========================
 
 def download_video(data):
-    url = data["url"]
-
-    output_template = os.path.join(STORAGE_VIDEO, "%(title)s.%(ext)s")
+    url = ensure_url(data)
+    prefix = f"video_{uuid.uuid4().hex[:10]}"
+    output_template = build_output_template(STORAGE_VIDEO, prefix)
 
     cmd = [
         "yt-dlp",
@@ -425,86 +441,61 @@ def download_video(data):
         "-o", output_template
     ]
 
-    process = subprocess.run(cmd, capture_output=True, text=True)
+    process = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace"
+    )
 
     if process.returncode != 0:
-        raise Exception(process.stderr)
+        raise Exception(process.stderr.strip() or "No se pudo descargar el video")
 
-    files = glob.glob(os.path.join(STORAGE_VIDEO, "*.mp4"))
-
-    if not files:
-        raise Exception("No se generó ningún video")
-
-    latest_file = max(files, key=os.path.getctime)
+    final_file = find_generated_file(STORAGE_VIDEO, prefix)
 
     return {
-        "filePath": latest_file
+        "filePath": final_file,
+        "filename": os.path.basename(final_file)
     }
 
+# ========================
+# DOWNLOAD AUDIO
+# ========================
 
-# ========================
-# 🎵 DOWNLOAD AUDIO
-# ========================
 def download_audio(data):
-    import os, glob, traceback
+    url = ensure_url(data)
+    prefix = f"audio_{uuid.uuid4().hex[:10]}"
+    output_template = build_output_template(STORAGE_AUDIO, prefix)
 
-    try:
-        print("\n ===== INICIO download_audio =====")
-        print("DATA:", data)
-        print("STORAGE_AUDIO:", STORAGE_AUDIO)
+    cmd = [
+        "yt-dlp",
+        *COMMON,
+        "--no-warnings",
+        "--no-check-certificates",
+        "--concurrent-fragments", "16",
+        "-f", "bestaudio/best",
+        "-x",
+        "--audio-format", "mp3",
+        "--audio-quality", "0",
+        "-o", output_template,
+        url
+    ]
 
-        url = data.get("url")
-        if not url:
-            raise Exception("Falta url")
+    process = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace"
+    )
 
-        output_template = os.path.join(STORAGE_AUDIO, "%(title)s.%(ext)s")
+    if process.returncode != 0:
+        raise Exception(process.stderr.strip() or "No se pudo descargar el audio")
 
-        cmd = [
-            "yt-dlp",
-            *COMMON,
-            "--no-warnings",
-            "--no-check-certificates",
-            "--concurrent-fragments", "16",
-            "-f", "bestaudio/best",
-            "-x",
-            "--audio-format", "mp3",
-            "--audio-quality", "0",
-            "-o", output_template,
-            url
-        ]
+    final_file = find_generated_file(STORAGE_AUDIO, prefix)
 
-        print("CMD:", " ".join(cmd))
-
-        process = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace"
-        )
-
-        print("RETURNCODE:", process.returncode)
-        print("STDOUT:\n", process.stdout or "(vacío)")
-        print("STDERR:\n", process.stderr or "(vacío)")
-
-        if process.returncode != 0:
-            raise Exception(process.stderr.strip() or process.stdout.strip() or "yt-dlp falló sin detalle")
-
-        files = glob.glob(os.path.join(STORAGE_AUDIO, "*.mp3"))
-        print("MP3 encontrados:", files)
-
-        if not files:
-            raise Exception("No se generó ningún audio mp3 en STORAGE_AUDIO")
-
-        latest_file = max(files, key=os.path.getctime)
-        print("Archivo final:", latest_file)
-
-        return {
-            "filePath": latest_file
-        }
-
-    except Exception as e:
-        print(" ERROR EN download_audio:")
-        print(str(e))
-        print(traceback.format_exc())
-        raise
+    return {
+        "filePath": final_file,
+        "filename": os.path.basename(final_file)
+    }
