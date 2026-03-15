@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-const gradient = require("gradient-string");
+//const gradient = require("gradient-string");
 
 require("dotenv").config();
 
@@ -144,7 +144,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, HOST, () => {
   const localIP = getLocalIP();
 
-  console.log(gradient.pastel.multiline("YT Music Downloader API"));
+  console.log(`Sistema iniciado: ${new Date().toLocaleString()}`);
   console.log(`Modo: ${NODE_ENV}`);
   console.log(`Servidor escuchando en ${HOST}:${PORT}`);
 

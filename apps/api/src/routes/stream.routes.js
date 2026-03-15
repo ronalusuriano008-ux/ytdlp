@@ -2,8 +2,7 @@ const router = require("express").Router();
 const python = require("../services/pythonClient");
 
 const cache = new Map();
-const CACHE_TTL = 1000 * 60 * 5;
-const MAX_QUERY_LENGTH = 100;
+const CACHE_TTL = 1000 * 60 * 10;
 const MAX_CACHE_ITEMS = 200;
 
 function pruneCache() {
@@ -23,67 +22,73 @@ function pruneCache() {
 
 router.get("/", async (req, res) => {
   try {
-    const query = String(req.query.q || "").trim();
+    const url = String(req.query.url || "").trim();
 
-    if (!query) {
+    console.log("[stream] req.query:", req.query);
+    console.log("[stream] url:", url);
+
+    if (!url) {
       return res.status(400).json({
         ok: false,
-        error: "No query provided"
+        error: "No url provided"
       });
     }
 
-    if (query.length > MAX_QUERY_LENGTH) {
-      return res.status(400).json({
-        ok: false,
-        error: "Query too long"
-      });
-    }
-
-    const cacheKey = query.toLowerCase();
     pruneCache();
 
-    const cached = cache.get(cacheKey);
+    const cached = cache.get(url);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      res.set("Cache-Control", "public, max-age=300");
+      res.set("Cache-Control", "public, max-age=600");
       return res.json({
         ok: true,
-        results: cached.data
+        directUrl: cached.directUrl
       });
     }
 
-    const results = await python.call("search", { query });
+    const result = await python.call("stream_url", { url });
 
-    console.log("[search] worker result:", results);
-    console.log("[search] isArray:", Array.isArray(results));
+    console.log("[stream] worker result:", result);
 
-    if (!Array.isArray(results)) {
+    if (
+      !result ||
+      typeof result.directUrl !== "string" ||
+      !result.directUrl.trim()
+    ) {
       return res.status(502).json({
         ok: false,
         error: "Invalid response from worker"
       });
     }
 
-    cache.set(cacheKey, {
-      data: results,
+    cache.set(url, {
+      directUrl: result.directUrl,
       timestamp: Date.now()
     });
 
-    res.set("Cache-Control", "public, max-age=300");
+    res.set("Cache-Control", "public, max-age=600");
     return res.json({
       ok: true,
-      results
+      directUrl: result.directUrl
     });
   } catch (err) {
-    const isTimeout = String(err.message || "").toLowerCase().includes("timeout");
+    const message = String(err.message || "");
+    const lower = message.toLowerCase();
 
-    if (isTimeout) {
+    console.error("[stream] Error:", message);
+
+    if (lower.includes("timeout")) {
       return res.status(504).json({
         ok: false,
-        error: "Search timeout"
+        error: "Stream timeout"
       });
     }
 
-    console.error("[search] Error:", err.message);
+    if (lower.includes("missing url")) {
+      return res.status(400).json({
+        ok: false,
+        error: "Missing url"
+      });
+    }
 
     return res.status(500).json({
       ok: false,

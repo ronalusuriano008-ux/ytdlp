@@ -1,4 +1,0 @@
-version: "3"
-agent:
-  authtoken: cr_3ADel9uh0V81so5myQzGG6Qq8nm
-  update_channel: stable
