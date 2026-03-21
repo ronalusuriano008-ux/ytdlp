@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
   <link rel="shortcut icon" href="/favicon.png">
 
-  <link rel="stylesheet" href="/assets/styles/main.css">
+  <link rel="stylesheet" href="/assets/styles/mainv1.css">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -31,6 +31,11 @@
         <button id="voiceBtn">
           <i class="fas fa-microphone"></i> VOZ
         </button>
+
+        <button id="themeToggleBtn" type="button" aria-label="Cambiar tema">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+
       </div>
 
       <p id="searchStatus" style="display:none; margin-top:10px;">
@@ -134,117 +139,107 @@
 
     </main>
 
-    <!-- ===== Footer ===== -->
-    <footer class="footer">
-      <p>
-        Este es un proyecto en desarrollo orientado al aprendizaje, la experimentación y el uso educativo.
-        Si tiene alguna sugerencia, puede utilizar el buzón de recomendaciones para enviar sus ideas o mejoras que
-        ayuden al crecimiento del proyecto.
-        No se aceptarán sugerencias relacionadas con contenido inapropiado, ilegal o que promueva usos indebidos de la
-        plataforma.
-      </p>
-
-      <p>
-        El proyecto tiene únicamente fines educativos y no comerciales. No se obtiene ningún beneficio económico de su
-        funcionamiento y su propósito principal es servir como entorno de prueba, estudio y desarrollo tecnológico.
-      </p>
-
-      <p>
-        Todo uso que los usuarios hagan del sistema es bajo su propia responsabilidad. Cualquier uso indebido, ilegal o
-        contrario a las normas establecidas no está relacionado con los objetivos del proyecto.
-      </p>
-
-      <p>
-        Este proyecto es abierto y compartido con fines de aprendizaje. El código, las ideas y los recursos utilizados
-        están pensados para ser estudiados, analizados y mejorados por la comunidad dentro de un contexto educativo.
-      </p>
-
-      <p>
-        Contacto: <a href="mailto:contactogmcn@gmail.com">contacto@proyecto.com</a>
-      </p>
-
-      <p>
-        Proyecto educativo · Sin fines de lucro · No comercial · Proyecto abierto
-      </p>
-      <p>
-        Proyecto creado el 05 de marzo de 2026 y desarrollado bajo el nombre de GMCN.
-        Si desea, puede revisar los <a href="#"
-          onclick="document.getElementById('terminos-gmcn').style.display='block';return false;">términos y condiciones
-          de GMCN</a>.
-      </p>
-
-      <div id="terminos-gmcn" style="display:none; padding:15px; border:1px solid #444; margin-top:10px;">
-
-        <h3>Términos y Condiciones - GMCN</h3>
-
-        <p>
-          Este proyecto es un desarrollo abierto creado con fines educativos, de aprendizaje y experimentación
-          tecnológica.
-          El acceso, uso o interacción con este proyecto implica la aceptación de los siguientes términos y condiciones.
-        </p>
-
-        <p><strong>1. Naturaleza del proyecto</strong><br>
-          GMCN es un proyecto abierto y experimental desarrollado únicamente con fines educativos. No tiene fines
-          comerciales ni está destinado a operar como un servicio profesional o productivo.
-        </p>
-
-        <p><strong>2. Responsabilidad del uso</strong><br>
-          El uso de esta aplicación es responsabilidad exclusiva del usuario. GMCN no se responsabiliza por el uso que
-          cada persona haga del sistema, sus herramientas o cualquier funcionalidad disponible.
-        </p>
-
-        <p><strong>3. Seguridad y entorno de pruebas</strong><br>
-          Este proyecto puede estar desarrollado en un entorno no seguro o de pruebas. Por lo tanto, cualquier
-          información introducida, almacenada o procesada dentro de la aplicación podría potencialmente filtrarse o no
-          contar con garantías completas de seguridad.
-        </p>
-
-        <p><strong>4. Protección de datos</strong><br>
-          GMCN no se responsabiliza por ataques informáticos, filtraciones de datos, accesos no autorizados, pérdida de
-          información o cualquier incidente de seguridad que pueda ocurrir durante el uso de la plataforma.
-        </p>
-
-        <p><strong>5. Derechos de autor</strong><br>
-          GMCN únicamente desarrolla el código y la estructura técnica del proyecto. No se responsabiliza por el
-          contenido, descargas o materiales que los usuarios puedan obtener o utilizar mediante la aplicación,
-          especialmente si estos materiales están protegidos por derechos de autor.
-        </p>
-
-        <p><strong>6. Uso de contenido</strong><br>
-          Cualquier intento de descargar, distribuir o utilizar contenido protegido por derechos de autor es
-          responsabilidad exclusiva del usuario. GMCN no promueve ni se responsabiliza por la violación de derechos de
-          propiedad intelectual.
-        </p>
-
-        <p><strong>7. Uso indebido</strong><br>
-          No está permitido utilizar el proyecto para realizar actividades ilegales, distribución de contenido ilegal,
-          explotación de vulnerabilidades, ataques informáticos o cualquier actividad que infrinja leyes locales o
-          internacionales.
-        </p>
-
-        <p><strong>8. Limitación de responsabilidad</strong><br>
-          Bajo ninguna circunstancia GMCN será responsable de daños directos, indirectos, incidentales o derivados del
-          uso o mal uso de la aplicación.
-        </p>
-
-        <p><strong>9. Modificaciones del proyecto</strong><br>
-          Al tratarse de un proyecto en desarrollo, las funcionalidades, características o condiciones pueden cambiar,
-          modificarse o eliminarse en cualquier momento sin previo aviso.
-        </p>
-
-        <p><strong>10. Aceptación de los términos</strong><br>
-          El uso de esta aplicación implica que el usuario ha leído, comprendido y aceptado estos términos y
-          condiciones.
-        </p>
-
-      </div>
-
-    </footer>
-
   </div>
 
 
+
+
   <script>
+
+    const themes = {
+      azul: {
+        "--bg-main": "#081426",
+        "--bg-secondary": "#0f1b2d",
+        "--bg-tertiary": "#132238",
+        "--card-bg": "rgba(19, 34, 56, 0.88)",
+        "--card-hover": "rgba(30, 47, 73, 0.96)",
+        "--text-primary": "#f8fbff",
+        "--text-secondary": "#bfd0e3",
+        "--text-muted": "#89a0bb",
+        "--accent-primary": "#4f8cff",
+        "--accent-secondary": "#7c5cff",
+        "--accent-tertiary": "#22d3ee",
+        "--gradient-main": "linear-gradient(135deg, #4f8cff 0%, #7c5cff 48%, #22d3ee 100%)",
+        "--overlay-main": "radial-gradient(circle at top left, rgba(79, 140, 255, 0.22), transparent 28%), radial-gradient(circle at bottom right, rgba(124, 92, 255, 0.2), transparent 30%), linear-gradient(145deg, #07101d 0%, #0f172a 48%, #081426 100%)"
+      },
+      morado: {
+        "--bg-main": "#0c1220",
+        "--bg-secondary": "#141b2d",
+        "--bg-tertiary": "#1c2440",
+        "--card-bg": "rgba(28, 36, 64, 0.88)",
+        "--card-hover": "rgba(38, 48, 83, 0.98)",
+        "--text-primary": "#fdf7ff",
+        "--text-secondary": "#e9d5ff",
+        "--text-muted": "#c4b5fd",
+        "--accent-primary": "#8b5cf6",
+        "--accent-secondary": "#ec4899",
+        "--accent-tertiary": "#a78bfa",
+        "--gradient-main": "linear-gradient(135deg, #8b5cf6 0%, #ec4899 52%, #a78bfa 100%)",
+        "--overlay-main": "radial-gradient(circle at top left, rgba(139, 92, 246, 0.22), transparent 28%), radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.18), transparent 30%), linear-gradient(145deg, #10091a 0%, #1a102a 48%, #0c1220 100%)"
+      },
+      verde: {
+        "--bg-main": "#071915",
+        "--bg-secondary": "#0d221c",
+        "--bg-tertiary": "#123028",
+        "--card-bg": "rgba(18, 48, 40, 0.9)",
+        "--card-hover": "rgba(25, 63, 52, 0.98)",
+        "--text-primary": "#f4fff8",
+        "--text-secondary": "#d1fae5",
+        "--text-muted": "#9ee6c6",
+        "--accent-primary": "#22c55e",
+        "--accent-secondary": "#10b981",
+        "--accent-tertiary": "#84cc16",
+        "--gradient-main": "linear-gradient(135deg, #22c55e 0%, #10b981 50%, #84cc16 100%)",
+        "--overlay-main": "radial-gradient(circle at top left, rgba(34, 197, 94, 0.2), transparent 26%), radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.18), transparent 30%), linear-gradient(145deg, #05110e 0%, #0b1815 48%, #071915 100%)"
+      },
+      naranja: {
+        "--bg-main": "#1a1008",
+        "--bg-secondary": "#23160d",
+        "--bg-tertiary": "#312013",
+        "--card-bg": "rgba(49, 32, 19, 0.9)",
+        "--card-hover": "rgba(66, 43, 26, 0.98)",
+        "--text-primary": "#fff9f4",
+        "--text-secondary": "#fed7aa",
+        "--text-muted": "#fdba74",
+        "--accent-primary": "#f97316",
+        "--accent-secondary": "#f59e0b",
+        "--accent-tertiary": "#fb923c",
+        "--gradient-main": "linear-gradient(135deg, #f97316 0%, #f59e0b 52%, #fb923c 100%)",
+        "--overlay-main": "radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 28%), radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.18), transparent 30%), linear-gradient(145deg, #120b06 0%, #1b120b 48%, #1a1008 100%)"
+      }
+    };
+
+    const themeOrder = Object.keys(themes);
+    const root = document.documentElement;
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+
+    function applyTheme(name) {
+      const theme = themes[name];
+      if (!theme) return;
+
+      Object.entries(theme).forEach(([key, value]) => {
+        root.style.setProperty(key, value);
+      });
+
+      localStorage.setItem("theme", name);
+    }
+
+    function getNextTheme(current) {
+      const index = themeOrder.indexOf(current);
+      const nextIndex = index === -1 ? 0 : (index + 1) % themeOrder.length;
+      return themeOrder[nextIndex];
+    }
+
+    let currentTheme = localStorage.getItem("theme") || themeOrder[0];
+    applyTheme(currentTheme);
+
+    themeToggleBtn.addEventListener("click", () => {
+      currentTheme = getNextTheme(currentTheme);
+      applyTheme(currentTheme);
+    });
+
+
+
     document.getElementById("homeSection")?.addEventListener("click", (e) => {
       e.preventDefault();
       window.location.href = "/index.html";
@@ -275,7 +270,7 @@
       window.location.href = "/perfil.html";
     });
   </script>
- <script type="module" src="/js/main.js" defer></script>
+  <script type="module" src="/js/main.js" defer></script>
 </body>
 
 </html>

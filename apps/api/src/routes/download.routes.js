@@ -83,15 +83,44 @@ function sendAndDelete(res, filePath, filename) {
   });
 }
 
+/**
+ * GET /download/video?url=...
+ * Compatible con tu frontend actual
+ */
+router.get("/video", async (req, res) => {
+  try {
+    console.log("[download/video][GET] query:", req.query);
+
+    const { filePath, filename } = await enqueue(() =>
+      safeDownload("download_video", req.query)
+    );
+
+    sendAndDelete(res, filePath, filename);
+  } catch (err) {
+    console.error("[download/video][GET]", err.message);
+
+    res.status(err.status || 500).json({
+      ok: false,
+      error: err.message || "Video download failed"
+    });
+  }
+});
+
+/**
+ * POST /download/video
+ * También lo dejamos soportado por consistencia
+ */
 router.post("/video", async (req, res) => {
   try {
+    console.log("[download/video][POST] body:", req.body);
+
     const { filePath, filename } = await enqueue(() =>
       safeDownload("download_video", req.body)
     );
 
     sendAndDelete(res, filePath, filename);
   } catch (err) {
-    console.error("[download/video]", err.message);
+    console.error("[download/video][POST]", err.message);
 
     res.status(err.status || 500).json({
       ok: false,
@@ -102,13 +131,15 @@ router.post("/video", async (req, res) => {
 
 router.post("/audio", async (req, res) => {
   try {
+    console.log("[download/audio][POST] body:", req.body);
+
     const { filePath, filename } = await enqueue(() =>
       safeDownload("download_audio", req.body)
     );
 
     sendAndDelete(res, filePath, filename);
   } catch (err) {
-    console.error("[download/audio]", err.message);
+    console.error("[download/audio][POST]", err.message);
 
     res.status(err.status || 500).json({
       ok: false,

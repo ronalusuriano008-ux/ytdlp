@@ -1,18 +1,22 @@
-import subprocess
 import os
-import requests
+import sys
 import time
 import uuid
+import shutil
+import subprocess
+import requests
 
 # ========================
 # RUTAS
 # ========================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))                     # apps/worker/src/downloader
-WORKER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))         # apps/worker
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))              # apps/worker/src/downloader
+WORKER_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))   # apps/worker
+SRC_DIR = os.path.join(WORKER_DIR, "src")
+
 STORAGE_VIDEO = os.path.join(WORKER_DIR, "storage", "videos")
 STORAGE_AUDIO = os.path.join(WORKER_DIR, "storage", "audio")
-COOKIE_PATH = os.path.join(WORKER_DIR, "src", "cookies.txt")
+COOKIE_PATH = os.path.join(SRC_DIR, "cookies.txt")
 
 os.makedirs(STORAGE_VIDEO, exist_ok=True)
 os.makedirs(STORAGE_AUDIO, exist_ok=True)
@@ -22,22 +26,24 @@ os.makedirs(STORAGE_AUDIO, exist_ok=True)
 # ========================
 
 STREAM_CACHE = {}
-STREAM_CACHE_TTL = 900
+STREAM_CACHE_TTL = 900  # 15 min
 
 SEARCH_CACHE = {}
-SEARCH_CACHE_TTL = 300
+SEARCH_CACHE_TTL = 300  # 5 min
 SEARCH_CACHE_MAX = 100
 
 # ========================
-# OPCIONES BASE yt-dlp
+# CONFIG BASE yt-dlp
 # ========================
 
 COMMON = [
-    "--cookies", COOKIE_PATH,
     "--force-ipv4",
     "--retries", "10",
     "--restrict-filenames"
 ]
+
+if os.path.exists(COOKIE_PATH):
+    COMMON = ["--cookies", COOKIE_PATH, *COMMON]
 
 # ========================
 # CONFIG YOUTUBEI
@@ -69,8 +75,12 @@ YOUTUBEI_PAYLOAD_CONTEXT = {
 }
 
 # ========================
-# HELPERS
+# HELPERS GENERALES
 # ========================
+
+def log(*args):
+    print("[ytdlp_runner]", *args, flush=True)
+
 
 def safe_get(data, *keys, default=None):
     current = data
@@ -155,6 +165,31 @@ def get_best_thumbnail(video_id, thumbnails):
     return None
 
 
+def ensure_url(data):
+    url = str((data or {}).get("url", "")).strip()
+    if not url:
+        raise ValueError("Missing url")
+    return url
+
+
+def build_output_template(storage_dir, prefix):
+    unique_id = uuid.uuid4().hex[:12]
+    return os.path.join(storage_dir, f"{prefix}_{unique_id}.%(ext)s")
+
+
+def find_generated_file(storage_dir, prefix):
+    matches = [
+        os.path.join(storage_dir, name)
+        for name in os.listdir(storage_dir)
+        if name.startswith(prefix + "_")
+    ]
+
+    if not matches:
+        raise FileNotFoundError("No se generó ningún archivo")
+
+    return max(matches, key=os.path.getctime)
+
+
 def prune_search_cache():
     now = time.time()
 
@@ -182,29 +217,74 @@ def prune_stream_cache():
         STREAM_CACHE.pop(key, None)
 
 
-def ensure_url(data):
-    url = str((data or {}).get("url", "")).strip()
-    if not url:
-        raise ValueError("Missing url")
-    return url
+# ========================
+# HELPERS EJECUTABLES
+# ========================
+
+def get_ytdlp_cmd():
+    return [sys.executable, "-m", "yt_dlp"]
 
 
-def build_output_template(storage_dir, prefix):
-    unique_id = uuid.uuid4().hex[:12]
-    return os.path.join(storage_dir, f"{prefix}_{unique_id}.%(ext)s")
+def get_ffmpeg_path():
+    return shutil.which("ffmpeg")
 
 
-def find_generated_file(storage_dir, prefix):
-    matches = [
-        os.path.join(storage_dir, name)
-        for name in os.listdir(storage_dir)
-        if name.startswith(prefix + "_")
+def get_ffprobe_path():
+    return shutil.which("ffprobe")
+
+
+def get_ffmpeg_location():
+    ffmpeg_path = get_ffmpeg_path()
+    if not ffmpeg_path:
+        return None
+    return os.path.dirname(ffmpeg_path)
+
+
+def build_base_ytdlp_command():
+    return [
+        *get_ytdlp_cmd(),
+        *COMMON,
+        "--no-warnings",
+        "--no-check-certificates"
     ]
 
-    if not matches:
-        raise FileNotFoundError("No se generó ningún archivo")
 
-    return max(matches, key=os.path.getctime)
+def run_command(cmd, cwd=None, timeout=None):
+    log("PYTHON:", sys.executable)
+    log("FFMPEG:", get_ffmpeg_path())
+    log("FFPROBE:", get_ffprobe_path())
+    log("CMD:", cmd)
+    log("CWD:", cwd)
+
+    if cwd and not os.path.exists(cwd):
+        raise FileNotFoundError(f"El directorio de trabajo no existe: {cwd}")
+
+    process = subprocess.run(
+        cmd,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=timeout
+    )
+
+    log("RETURN CODE:", process.returncode)
+
+    if process.stdout:
+        log("STDOUT:", process.stdout[:4000])
+
+    if process.stderr:
+        log("STDERR:", process.stderr[:4000])
+
+    return process
+
+
+def raise_process_error(process, fallback_message):
+    stderr = (process.stderr or "").strip()
+    stdout = (process.stdout or "").strip()
+    message = stderr or stdout or fallback_message
+    raise Exception(message)
 
 
 # ========================
@@ -232,7 +312,15 @@ def parse_video_renderer(video):
 
     duration_text = (
         get_text(video.get("lengthText")) or
-        get_text(video.get("thumbnailOverlays", [{}])[0].get("thumbnailOverlayTimeStatusRenderer", {}).get("text")) or
+        get_text(
+            safe_get(
+                video,
+                "thumbnailOverlays",
+                0,
+                "thumbnailOverlayTimeStatusRenderer",
+                "text"
+            )
+        ) or
         "0:00"
     )
 
@@ -331,6 +419,7 @@ def do_youtubei_search(query):
     response.raise_for_status()
     return response.json()
 
+
 # ========================
 # SEARCH
 # ========================
@@ -372,6 +461,7 @@ def search(query):
 
     return {"results": unique}
 
+
 # ========================
 # STREAM URL
 # ========================
@@ -385,28 +475,24 @@ def stream_url(data):
         return {"directUrl": cached["value"]}
 
     cmd = [
-        "yt-dlp",
-        "--no-warnings",
+        *build_base_ytdlp_command(),
         "--no-call-home",
-        "--no-check-certificates",
         "--extractor-args", "youtube:player_client=android",
         "-f", "best",
         "-g",
         url
     ]
 
-    process = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace"
-    )
+    process = run_command(cmd)
 
     if process.returncode != 0:
-        raise Exception(process.stderr.strip() or "No se pudo obtener directUrl")
+        raise_process_error(process, "No se pudo obtener directUrl")
 
-    direct_url = process.stdout.strip().splitlines()[0]
+    lines = [line.strip() for line in process.stdout.splitlines() if line.strip()]
+    if not lines:
+        raise Exception("yt-dlp no devolvió ninguna URL directa")
+
+    direct_url = lines[0]
 
     STREAM_CACHE[url] = {
         "time": time.time(),
@@ -416,6 +502,7 @@ def stream_url(data):
     return {
         "directUrl": direct_url
     }
+
 
 # ========================
 # DOWNLOAD VIDEO
@@ -427,30 +514,27 @@ def download_video(data):
     output_template = build_output_template(STORAGE_VIDEO, prefix)
 
     cmd = [
-        "yt-dlp",
-        *COMMON,
-        "--no-warnings",
+        *build_base_ytdlp_command(),
         "--no-call-home",
-        "--no-check-certificates",
         "--concurrent-fragments", "16",
         "--extractor-args", "youtube:player_client=android",
         "--merge-output-format", "mp4",
         "--remux-video", "mp4",
         "-f", "bv*+ba/bestvideo+bestaudio/best",
-        url,
-        "-o", output_template
+        "-o", output_template,
+        url
     ]
 
-    process = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace"
-    )
+    ffmpeg_location = get_ffmpeg_location()
+    if ffmpeg_location:
+        cmd.extend(["--ffmpeg-location", ffmpeg_location])
+    else:
+        log("Aviso: ffmpeg no encontrado. La mezcla/remux puede fallar.")
+
+    process = run_command(cmd)
 
     if process.returncode != 0:
-        raise Exception(process.stderr.strip() or "No se pudo descargar el video")
+        raise_process_error(process, "No se pudo descargar el video")
 
     final_file = find_generated_file(STORAGE_VIDEO, prefix)
 
@@ -458,6 +542,7 @@ def download_video(data):
         "filePath": final_file,
         "filename": os.path.basename(final_file)
     }
+
 
 # ========================
 # DOWNLOAD AUDIO
@@ -468,12 +553,16 @@ def download_audio(data):
     prefix = f"audio_{uuid.uuid4().hex[:10]}"
     output_template = build_output_template(STORAGE_AUDIO, prefix)
 
+    ffmpeg_location = get_ffmpeg_location()
+    if not ffmpeg_location:
+        raise FileNotFoundError(
+            "ffmpeg no está instalado o no está en PATH. Es necesario para convertir el audio a mp3."
+        )
+
     cmd = [
-        "yt-dlp",
-        *COMMON,
-        "--no-warnings",
-        "--no-check-certificates",
+        *build_base_ytdlp_command(),
         "--concurrent-fragments", "16",
+        "--ffmpeg-location", ffmpeg_location,
         "-f", "bestaudio/best",
         "-x",
         "--audio-format", "mp3",
@@ -482,16 +571,10 @@ def download_audio(data):
         url
     ]
 
-    process = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace"
-    )
+    process = run_command(cmd)
 
     if process.returncode != 0:
-        raise Exception(process.stderr.strip() or "No se pudo descargar el audio")
+        raise_process_error(process, "No se pudo descargar el audio")
 
     final_file = find_generated_file(STORAGE_AUDIO, prefix)
 
