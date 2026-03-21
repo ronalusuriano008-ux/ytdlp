@@ -24,7 +24,7 @@ def favicon():
 
 
 # ==========================
-# HEALTH CHECK
+# HEALTH CHECK 
 # ==========================
 @app.route("/health", methods=["GET"])
 def health():
@@ -36,7 +36,7 @@ def health():
 
 
 # ==========================
-# SEARCH
+# SEARCH VIDEOS
 # ==========================
 @app.route("/search", methods=["GET", "POST"])
 def search():
@@ -63,7 +63,7 @@ def search():
 
 
 # ==========================
-# METADATA
+# METADATA EXTRACTION
 # ==========================
 @app.route("/metadata", methods=["POST"])
 def meta():
@@ -85,7 +85,7 @@ def meta():
 
 
 # ==========================
-# STREAM URL
+# STREAM URL EXTRACTION
 # ==========================
 @app.route("/stream_url", methods=["POST"])
 def stream_url():
@@ -107,7 +107,7 @@ def stream_url():
 
 
 # ==========================
-# DOWNLOAD VIDEO
+# DOWNLOAD VIDEO 
 # ==========================
 @app.route("/download_video", methods=["POST"])
 def download_video():
@@ -149,7 +149,7 @@ def download_audio():
 
 
 # ==========================
-# 404
+# 404 
 # ==========================
 @app.errorhandler(404)
 def not_found(_e):
@@ -182,7 +182,7 @@ def handle_exception(e):
 
 
 # ==========================
-# START SERVER
+# START SERVER 
 # ==========================
 if __name__ == "__main__":
     print(f"Worker corriendo en {HOST}:{PORT} | env={ENV}")
