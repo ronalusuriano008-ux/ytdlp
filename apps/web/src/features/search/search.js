@@ -30,6 +30,21 @@ function formatDuration(seconds = 0) {
   return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
+
+const input = document.getElementById("searchInput");
+const clearBtn = document.getElementById("clearInput");
+
+input.addEventListener("input", () => {
+  clearBtn.style.display = input.value ? "block" : "none";
+});
+
+clearBtn.addEventListener("click", () => {
+  input.value = "";
+  input.focus();
+  clearBtn.style.display = "none";
+});
+
+
 function showSkeletons() {
   const container = getEl("results");
   if (!container) return;
