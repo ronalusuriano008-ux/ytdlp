@@ -9,7 +9,7 @@
   <title>Downloader App</title>
 
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-  <link rel="shortcut icon" href="/favicon.png">
+  <link  id="dynamic-favicon" type="image/png" href="/favicon.png">
 
   <link rel="stylesheet" href="/assets/styles/mainv1.css">
 
@@ -18,136 +18,140 @@
 </head>
 
 <body>
-  <div class="wrapper">
 
-    <main id="content" class="content">
+  <div id="appBackground"></div>
+  <div id="appBackgroundOverlay"></div>
+  <div id="app">
+    <div class="wrapper">
 
-      <!-- ===== Buscador ===== -->
-      <div id="searchContainer">
-        <div class="search-input-wrap">
-          <input id="searchInput" placeholder="Buscar video...">
+      <main id="content" class="content">
 
-          <button id="clearInput" class="clear-btn">
-            <i class="fas fa-times"></i>
+        <!-- ===== Buscador ===== -->
+        <div id="searchContainer">
+          <div class="search-input-wrap">
+            <input id="searchInput" placeholder="Buscar video o url...">
+
+            <button id="clearInput" class="clear-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button id="searchBtn">
+            <i class="fas fa-search"></i> Buscar
           </button>
-        </div>
-        <button id="searchBtn">
-          <i class="fas fa-search"></i> Buscar
-        </button>
-        <button id="voiceBtn">
-          <i class="fas fa-microphone"></i> VOZ
-        </button>
+          <button id="voiceBtn">
+            <i class="fas fa-microphone"></i> VOZ
+          </button>
 
-        <button id="themeToggleBtn" type="button" aria-label="Cambiar tema">
-          <i class="fa-solid fa-arrows-rotate"></i>
-        </button>
+          <button id="themeToggleBtn" type="button" aria-label="Cambiar tema">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
 
-      </div>
-
-      <p id="searchStatus" style="display:none; margin-top:10px;">
-        <i class="fas fa-spinner fa-spin"></i> Buscando...
-      </p>
-
-      <!-- ===== Secciones ===== -->
-      <div class="sections-bar">
-
-        <a href="#" id="homeSection" class="section-btn">
-          <i class="fas fa-house"></i>
-          <span>Inicio</span>
-        </a>
-
-        <a href="#" id="musicSection" class="section-btn">
-          <i class="fas fa-music"></i>
-          <span>Música</span>
-        </a>
-
-        <a href="#" id="historySection" class="section-btn">
-          <i class="fas fa-clock-rotate-left"></i>
-          <span>Historial</span>
-        </a>
-
-        <a href="#" id="favoritesSection" class="section-btn">
-          <i class="fas fa-heart"></i>
-          <span>Favoritos</span>
-        </a>
-
-        <a href="#" id="downloadsSection" class="section-btn">
-          <i class="fas fa-circle-down"></i>
-          <span>Descargas</span>
-        </a>
-
-        <a href="#" id="profileSection" class="section-btn">
-          <i class="fas fa-user"></i>
-          <span>Perfil</span>
-        </a>
-
-      </div>
-
-      <!-- ===== Historial de búsquedas ===== -->
-      <section class="section search-history-section">
-        <div id="searchHistoryList" class="search-history-list"></div>
-      </section>
-
-      <!-- ===== Reproductor ===== -->
-      <div class="video-card">
-
-        <div class="video-wrapper">
-          <video id="player" controls autoplay preload="auto"></video>
-          <video id="preloadPlayer" style="display:none;"></video>
         </div>
 
-        <div class="video-info">
-          <h4 id="videoMainTitle"></h4>
-          <h5 id="videoSubTitle"></h5>
+        <p id="searchStatus" style="display:none; margin-top:10px;">
+          <i class="fas fa-spinner fa-spin"></i> Buscando...
+        </p>
 
-          <div class="controller">
-            <button type="button" class="control-btn seek-back">
-              <i class="fas fa-rotate-left"></i>
-            </button>
+        <!-- ===== Secciones ===== -->
+        <div class="sections-bar">
 
-            <button type="button" id="prevBtn" class="control-btn prev-btn">
-              <i class="fas fa-step-backward"></i>
-            </button>
+          <a href="#" id="homeSection" class="section-btn">
+            <i class="fas fa-house"></i>
+            <span>Inicio</span>
+          </a>
 
-            <button id="playPauseBtn" class="control-btn play-btn">
-              <i class="fas fa-play"></i>
-            </button>
+          <a href="#" id="musicSection" class="section-btn">
+            <i class="fas fa-music"></i>
+            <span>Música</span>
+          </a>
 
-            <button type="button" id="nextBtn" class="control-btn next-btn">
-              <i class="fas fa-step-forward"></i>
-            </button>
+          <a href="#" id="historySection" class="section-btn">
+            <i class="fas fa-clock-rotate-left"></i>
+            <span>Historial</span>
+          </a>
 
-            <button class="control-btn seek-forward">
-              <i class="fas fa-rotate-right"></i>
-            </button>
+          <a href="#" id="favoritesSection" class="section-btn">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+          </a>
+
+          <a href="#" id="downloadsSection" class="section-btn">
+            <i class="fas fa-circle-down"></i>
+            <span>Descargas</span>
+          </a>
+
+          <a href="#" id="profileSection" class="section-btn">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+          </a>
+
+        </div>
+
+        <!-- ===== Historial de búsquedas ===== -->
+        <section class="section search-history-section">
+          <div id="searchHistoryList" class="search-history-list"></div>
+        </section>
+
+        <!-- ===== Reproductor ===== -->
+        <div class="video-card">
+
+          <div class="video-wrapper">
+            <video id="player" controls autoplay preload="auto"></video>
+            <video id="preloadPlayer" style="display:none;"></video>
           </div>
 
-          <div id="videoLoading" class="video-loading hidden"></div>
+          <div class="video-info">
+            <h4 id="videoMainTitle"></h4>
+            <h5 id="videoSubTitle"></h5>
 
-          <div id="downloadContainer" class="download-container hidden">
-            <button id="downloadVideoBtn">
-              <i class="fas fa-download"></i>
-              <span>Descargar Video</span>
-            </button>
+            <div class="controller">
+              <button type="button" class="control-btn seek-back">
+                <i class="fas fa-rotate-left"></i>
+              </button>
 
-            <button id="downloadAudioBtn">
-              <i class="fas fa-music"></i>
-              <span>Descargar Audio</span>
-            </button>
+              <button type="button" id="prevBtn" class="control-btn prev-btn">
+                <i class="fas fa-step-backward"></i>
+              </button>
+
+              <button id="playPauseBtn" class="control-btn play-btn">
+                <i class="fas fa-play"></i>
+              </button>
+
+              <button type="button" id="nextBtn" class="control-btn next-btn">
+                <i class="fas fa-step-forward"></i>
+              </button>
+
+              <button class="control-btn seek-forward">
+                <i class="fas fa-rotate-right"></i>
+              </button>
+            </div>
+
+            <div id="videoLoading" class="video-loading hidden"></div>
+
+            <div id="downloadContainer" class="download-container hidden">
+              <button id="downloadVideoBtn">
+                <i class="fas fa-download"></i>
+                <span>Descargar Video</span>
+              </button>
+
+              <button id="downloadAudioBtn">
+                <i class="fas fa-music"></i>
+                <span>Descargar Audio</span>
+              </button>
+            </div>
+
           </div>
 
         </div>
 
-      </div>
+        <!-- ===== Resultados ===== -->
+        <div id="results"></div>
 
-      <!-- ===== Resultados ===== -->
-      <div id="results"></div>
+      </main>
 
-    </main>
+    </div>
 
   </div>
-
-
 
 
   <script>
