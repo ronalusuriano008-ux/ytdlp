@@ -8,6 +8,8 @@ export async function downloadVideo() {
   const stopStatus = showStatus([
     "Descargando video...",
     "Espere...",
+    "Conectando a la api...",
+    "Convirtiendo a mp4...",
     "Procesando archivo..."
   ]);
 

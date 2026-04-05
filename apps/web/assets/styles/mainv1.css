@@ -162,17 +162,19 @@ body {
   0% {
     background-position: 220% 0;
   }
+
   100% {
     background-position: -220% 0;
   }
 }
+
 #searchContainer {
   width: 100%;
   display: flex;
   align-items: stretch;
   gap: 1.2%;
   margin-bottom: 2.6%;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .search-input-wrap {
@@ -573,15 +575,19 @@ body {
   0% {
     content: "";
   }
+
   25% {
     content: ".";
   }
+
   50% {
     content: "..";
   }
+
   75% {
     content: "...";
   }
+
   100% {
     content: "";
   }

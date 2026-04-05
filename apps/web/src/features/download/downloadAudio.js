@@ -8,7 +8,10 @@ export async function downloadAudio() {
   const stopStatus = showStatus([
     "Descargando audio...",
     "Espere...",
-    "Procesando archivo..."
+    "Procesando archivo...",
+    "Conectando a ffmpeg...",
+    "Convirtiendo a mp3...",
+    "Enviando archivo..."
   ]);
 
   try {

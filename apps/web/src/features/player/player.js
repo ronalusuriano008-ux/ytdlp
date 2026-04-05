@@ -28,12 +28,7 @@ export function initPlayer() {
 
   let isLoading = false;
   let loadToken = 0;
-
-
-
-
-
-  
+ 
   function hasPlaylist() {
     return Array.isArray(state.videoList) && state.videoList.length > 0;
   }

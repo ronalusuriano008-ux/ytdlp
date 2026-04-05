@@ -22,7 +22,7 @@ os.makedirs(STORAGE_VIDEO, exist_ok=True)
 os.makedirs(STORAGE_AUDIO, exist_ok=True)
 
 # ========================
-# CACHE
+# CACHE 
 # ========================
 
 STREAM_CACHE = {}
@@ -33,7 +33,7 @@ SEARCH_CACHE_TTL = 300  # 5 min
 SEARCH_CACHE_MAX = 100
 
 # ========================
-# CONFIG BASE yt-dlp
+# CONFIG BASE yt-dlp  
 # ========================
 
 COMMON = [
@@ -46,7 +46,7 @@ if os.path.exists(COOKIE_PATH):
     COMMON = ["--cookies", COOKIE_PATH, *COMMON]
 
 # ========================
-# CONFIG YOUTUBEI
+# CONFIG YOUTUBEI 
 # ========================
 
 YOUTUBEI_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
@@ -75,7 +75,7 @@ YOUTUBEI_PAYLOAD_CONTEXT = {
 }
 
 # ========================
-# HELPERS GENERALES
+# HELPERS  GENERALES
 # ========================
 
 def log(*args):
